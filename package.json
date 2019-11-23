@@ -2,7 +2,7 @@
   "name": "react-native-adyen-payment",
   "title": "React Native Adyen Payment",
   "version": "1.0.0",
-  "description": "React Native Adyen Payment",
+  "description": "React Native Adyen Payment Native Module",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
