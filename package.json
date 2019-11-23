@@ -2,18 +2,18 @@
   "name": "react-native-adyen-payment",
   "title": "React Native Adyen Payment",
   "version": "1.0.0",
-  "description": "TODO",
+  "description": "React Native Adyen Payment",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/github_account/react-native-adyen-payment.git",
-    "baseUrl": "https://github.com/github_account/react-native-adyen-payment"
+    "url": "git+https://github.com/mkharibalaji/react-native-adyen-payment.git",
+    "baseUrl": "https://github.com/mkharibalaji/react-native-adyen-payment"
   },
   "keywords": [
-    "react-native"
+    "react-native","Adyen","React Native","Adyen Payment"
   ],
   "author": {
     "name": "M K Hari Balaji",
