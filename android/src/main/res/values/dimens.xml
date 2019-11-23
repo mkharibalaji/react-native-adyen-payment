@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2019 Adyen N.V.
+  ~
+  ~ This file is open source and available under the MIT license. See the LICENSE file for more info.
+  ~
+  ~ Created by caiof on 26/3/2019.
+  -->
+
+<resources>
+    <dimen name="pay_button_height">60dp</dimen>
+
+    <dimen name="bottom_sheet_corner_radius">16dp</dimen>
+    <dimen name="bottom_sheet_top_padding">8dp</dimen>
+    <dimen name="indicator_width">26dp</dimen>
+    <dimen name="indicator_height">4dp</dimen>
+</resources>

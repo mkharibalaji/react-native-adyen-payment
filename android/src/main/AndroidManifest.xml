@@ -1,0 +1,29 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.rnlib.adyen">
+
+     <application>
+     	<activity
+            android:name=".ui.AdyenComponentActivity"
+            android:launchMode="singleTask"
+            android:theme="@style/AdyenCheckout.Translucent">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+
+                <data
+                    android:host="${applicationId}"
+                    android:scheme="${checkoutRedirectScheme}" />
+            </intent-filter>
+        </activity>
+        <service
+            android:name=".AdyenDropInService"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+        <service
+            android:name=".AdyenComponentService"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+    </application>
+
+</manifest>
