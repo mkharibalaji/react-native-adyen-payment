@@ -1,5 +1,9 @@
 # react-native-adyen-payment
 
+## Requirements
+  1. React Native > 0.60
+  2. XCode 11
+
 ## Getting started
 
 `$ npm install react-native-adyen-payment --save`
@@ -33,6 +37,12 @@
       compile project(':react-native-adyen-payment')
   	```
 
+### Additional Setup
+
+#### iOS
+
+
+#### Android
 
 ## Usage
 ```javascript
