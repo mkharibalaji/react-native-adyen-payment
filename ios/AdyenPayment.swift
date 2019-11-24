@@ -90,7 +90,7 @@ class AdyenPayment: RCTEventEmitter {
     }
     
     
-    func showCardComponent(_ componentData : NSDictionary) {
+    func showCardComponent(_ componentData : NSDictionary) throws {
         guard let paymentMethod = self.paymentMethods?.paymentMethod(ofType: CardPaymentMethod.self) else { return}
         let cardComponent : [String:Any] = componentData["scheme"] as? [String:Any] ?? [:]
         guard cardComponent["card_public_key"] != nil else {return}
@@ -108,7 +108,7 @@ class AdyenPayment: RCTEventEmitter {
     
 
 
-    func showIssuerComponent(_ component : String, componentData : NSDictionary) {
+    func showIssuerComponent(_ component : String, componentData : NSDictionary) throws{
         DispatchQueue.main.async {
             guard let paymentMethod = self.paymentMethods?.paymentMethod(ofType: IssuerListPaymentMethod.self) else { return }
             let component = IssuerListComponent(paymentMethod: paymentMethod)
@@ -117,7 +117,7 @@ class AdyenPayment: RCTEventEmitter {
     }
 
     
-    func showSEPADirectDebitComponent(_ componentData : NSDictionary) {
+    func showSEPADirectDebitComponent(_ componentData : NSDictionary)throws {
         DispatchQueue.main.async {
             guard let paymentMethod = self.paymentMethods?.paymentMethod(ofType: SEPADirectDebitPaymentMethod.self) else { return }
             let component = SEPADirectDebitComponent(paymentMethod: paymentMethod)
@@ -126,16 +126,19 @@ class AdyenPayment: RCTEventEmitter {
         }
     }
  
-    func showApplePayComponent(_ componentData : NSDictionary) {
+    func showApplePayComponent(_ componentData : NSDictionary) throws {
         DispatchQueue.main.async {
             guard let paymentMethod = self.paymentMethods?.paymentMethod(ofType: ApplePayPaymentMethod.self) else { return }
             let appleComponent : [String:Any] = componentData["applepay"] as? [String:Any] ?? [:]
             guard appleComponent["apple_pay_merchant_id"] != nil else {return}
             let amt = NSDecimalNumber(string: String(format: "%.2f", Float((PaymentsData.amount.value) / 100)))
             let applePaySummaryItems = [PKPaymentSummaryItem(label: "Total", amount: amt, type: .final)]
-            let component = ApplePayComponent(paymentMethod: paymentMethod,merchantIdentifier: appleComponent["apple_pay_merchant_id"] as! String,summaryItems: applePaySummaryItems)
-            component?.delegate = self
-            self.present(component!)
+            
+            let component = ApplePayComponent(paymentMethod: paymentMethod,payment:Payment(amount: PaymentsData.amount, countryCode: PaymentsData.countryCode),merchantIdentifier: appleComponent["apple_pay_merchant_id"] as! String,summaryItems: applePaySummaryItems)
+            if(component != nil){
+                component?.delegate = self
+                self.present(component!)
+            }
         }
     }
     
@@ -201,26 +204,33 @@ class AdyenPayment: RCTEventEmitter {
     }
     
     func startPayment(_ component : String,componentData : NSDictionary){
-        switch component {
-            case "dropin":
-                self.showDropInComponent(componentData)
-            case "scheme":
-                self.showCardComponent(componentData)
-            case "applepay":
-                self.showApplePayComponent(componentData)
-            case "sepadirectdebit":
-                self.showSEPADirectDebitComponent(componentData)
-            case "ideal","entercash","eps","dotpay","openbanking_UK","molpay_ebanking_fpx_MY","molpay_ebanking_TH","molpay_ebanking_VN":
-                self.showIssuerComponent(component,componentData : componentData)
-            default :
-                self.sendEvent(
-                    withName: "onError",
-                    body: ["code": "ERROR_UNKNOWN_PAYMENT_METHOD", "message": "Unknown Payment Method"]
-                )
+        do{
+            switch component {
+                case "dropin":
+                    try self.showDropInComponent(componentData)
+                case "scheme":
+                    try self.showCardComponent(componentData)
+                case "applepay":
+                    try self.showApplePayComponent(componentData)
+                case "sepadirectdebit":
+                    try self.showSEPADirectDebitComponent(componentData)
+                case "ideal","entercash","eps","dotpay","openbanking_UK","molpay_ebanking_fpx_MY","molpay_ebanking_TH","molpay_ebanking_VN":
+                    try self.showIssuerComponent(component,componentData : componentData)
+                default :
+                    self.sendEvent(
+                        withName: "onError",
+                        body: ["code": "ERROR_UNKNOWN_PAYMENT_METHOD", "message": "Unknown Payment Method"]
+                    )
+            }
+        } catch  {
+            self.sendEvent(
+                withName: "onError",
+                body: ["code": "ERROR_UNKNOWN", "message": error]
+            )
         }
     }
     
-    func showDropInComponent(_ componentData : NSDictionary) {
+    func showDropInComponent(_ componentData : NSDictionary) throws{
         let configuration = DropInComponent.PaymentMethodsConfiguration()
         let appleComponent : [String:Any] = componentData["applepay"] as? [String:Any] ?? [:]
         let cardComponent : [String:Any] = componentData["scheme"] as? [String:Any] ?? [:]
