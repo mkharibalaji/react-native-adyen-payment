@@ -1,4 +1,4 @@
-# react-native-adyen-payment
+# react-native-adyen-payment -- Work In Progress
 
 ## Requirements
   1. React Native > 0.60
