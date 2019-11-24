@@ -1,8 +1,5 @@
-//  Created by react-native-create-bridge
 import Foundation
 import Adyen
-//import AdyenCard
-//import AdyenDropIn
 import PassKit
 
 
@@ -15,8 +12,6 @@ class AdyenPayment: RCTEventEmitter {
     var componentData : NSDictionary?
     var component : String?
     var vSpinner : UIView?
-    //var resolve : RCTPromiseResolveBlock?
-    //var reject : RCTPromiseRejectBlock?
     
     lazy var apiClient = APIClient()
     

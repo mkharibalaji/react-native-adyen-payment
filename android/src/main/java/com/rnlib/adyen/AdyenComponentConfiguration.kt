@@ -1,11 +1,3 @@
-/*
- * Copyright (c) 2019 Adyen N.V.
- *
- * This file is open source and available under the MIT license. See the LICENSE file for more info.
- *
- * Created by caiof on 21/3/2019.
- */
-
 package com.rnlib.adyen
 
 import android.content.ComponentName
@@ -36,6 +28,7 @@ import com.adyen.checkout.ideal.IdealConfiguration
 import com.adyen.checkout.molpay.MolpayConfiguration
 import com.adyen.checkout.openbanking.OpenBankingConfiguration
 import com.adyen.checkout.sepa.SepaConfiguration
+import com.adyen.checkout.wechatpay.WeChatPayConfiguration
 import java.util.Locale
 
 /**
@@ -274,6 +267,14 @@ class AdyenComponentConfiguration : Configuration, Parcelable {
          */
         fun addBcmcConfiguration(bcmcConfiguration: BcmcConfiguration): Builder {
             availableConfigs[PaymentMethodTypes.BCMC] = bcmcConfiguration
+            return this
+        }
+
+        /**
+         * Add configuration for WeChatPaySDK payment method.
+         */
+        fun addWeChatPaySDKConfiguration(wechatPayConfiguration: WeChatPayConfiguration): Builder {
+            availableConfigs[PaymentMethodTypes.WECHAT_PAY_SDK] = wechatPayConfiguration
             return this
         }
 

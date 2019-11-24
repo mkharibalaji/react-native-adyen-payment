@@ -59,6 +59,7 @@ import com.adyen.checkout.molpay.MolpayConfiguration
 import com.adyen.checkout.dotpay.DotpayConfiguration
 import com.adyen.checkout.openbanking.OpenBankingConfiguration
 import com.adyen.checkout.sepa.SepaConfiguration
+import com.adyen.checkout.wechatpay.WeChatPayConfiguration
 
 import com.rnlib.adyen.ui.LoadingDialogFragment
 import androidx.fragment.app.DialogFragment
@@ -167,6 +168,7 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
                             PaymentMethodTypes.OPEN_BANKING -> showOpenBankingComponent(compData)
                             PaymentMethodTypes.SEPA -> showSEPAComponent(compData)
                             PaymentMethodTypes.BCMC -> showBCMCComponent(compData)
+                            PaymentMethodTypes.WECHAT_PAY_SDK -> showWeChatPayComponent(component,compData)
                             else -> {
                                 val evtObj : JSONObject = JSONObject()
                                 evtObj.put("code","ERROR_UNKNOWN_PAYMENT_METHOD")
@@ -209,6 +211,16 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
             Log.e(TAG, "Amount not valid", e)
         }
         return adyenConfigurationBuilder
+    }
+
+    private fun showWeChatPayComponent(component : String,componentData : JSONObject){
+        val context = getReactApplicationContext()
+        val wechatPayConfiguration = WeChatPayConfiguration.Builder(context).build()
+        val configBuilder : AdyenComponentConfiguration.Builder = createConfigurationBuilder(context)
+        when (component){
+            PaymentMethodTypes.WECHAT_PAY_SDK -> configBuilder.addWeChatPaySDKConfiguration(wechatPayConfiguration)
+        }
+        AdyenComponent.startPayment(context, paymentMethodsApiResponse, configBuilder.build())
     }
 
     private fun showIdealComponent(componentData : JSONObject){
