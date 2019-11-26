@@ -16,20 +16,11 @@
 
 #### iOS
 
-1. goto your <ProjectFolder>/ios and run "pod install"
-  
-#### Android
-
-1. Open up `android/app/src/main/java/[...]/MainApplication.java` - Do this step if the Package is not added properly
-  - Add `import com.reactlibrary.AdyenPaymentPackage;` to the imports at the top of the file
-  - Add `new AdyenPaymentPackage()` to the list returned by the `getPackages()` method
-
-### Additional Setup
-
-#### iOS
-As per the facebook RN doc, create a empty swift file in the name of your project and create the bridge in your RN project,
-
-* Create a Swift file
+ * Goto ProjectFolder/ios and run
+ 
+ ```pod install```
+ 
+ * Create a Swift file
 
 1. From Xcode, just go to:
 
@@ -71,6 +62,19 @@ import Adyen
 }
 .....
 ```
+  
+#### Android
+
+1. Open up `android/app/src/main/java/[...]/MainApplication.java` - Do this step if the Package is not added properly
+  - Add `import com.reactlibrary.AdyenPaymentPackage;` to the imports at the top of the file
+  - Add `new AdyenPaymentPackage()` to the list returned by the `getPackages()` method
+
+### Additional Setup
+
+#### iOS
+As per the facebook RN doc, create a empty swift file in the name of your project and create the bridge in your RN project,
+
+
 
 #### Android
 
