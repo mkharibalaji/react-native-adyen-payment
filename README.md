@@ -40,22 +40,22 @@
 ### Additional Setup
 
 #### iOS
-As per the facebook RN doc, create a empty swift file in the name of your project and create the bridge ni your RN project,
+As per the facebook RN doc, create a empty swift file in the name of your project and create the bridge in your RN project,
 
 * Create a Swift file
 
 1. From Xcode, just go to:
 
-        File → New → File… (or CMD+N)
-        Select Swift File
-        Name your file <YourProjectName>
-        In the Group dropdown, make sure to select the group <YourProjectNameFolder>(Yellow Folder Icon), not the project itself(Blue XCode icon).
+      File → New → File… (or CMD+N)
+      Select Swift File
+      Name your file <YourProjectName>
+      In the Group dropdown, make sure to select the group <YourProjectNameFolder>(Yellow Folder Icon), not the project itself(Blue XCode icon).
     
 2. Configure the Objective-C Bridging Header
 
-        After you create the Swift file, you should be prompted to choose if you want to configure an Objective-C Bridging Header. Select “Create Bridging Header”.This file is usually named YourProject-Bridging-Header.h. Don’t change this name manually, because Xcode configures the project with this exact filename.
+      After you create the Swift file, you should be prompted to choose if you want to configure an Objective-C Bridging Header. Select “Create Bridging Header”.This file is usually named YourProject-Bridging-Header.h. Don’t change this name manually, because Xcode configures the project with this exact filename.
     
-    Note: there is only one Bridging Header per project, so once you have configured it, you won’t be prompted to do it again.
+    Note: There is only one Bridging Header per project, so once you have configured it, you won’t be prompted to do it again.
 
 * Within <YourProjectName.swift> empty file add the following,
 ```
