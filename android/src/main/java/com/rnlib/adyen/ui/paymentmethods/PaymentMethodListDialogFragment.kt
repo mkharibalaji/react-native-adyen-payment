@@ -47,7 +47,7 @@ class PaymentMethodListDialogFragment : DropInBottomSheetDialogFragment(), Payme
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         Logger.d(TAG, "onCreateView")
         mAdyenComponentViewModel = ViewModelProviders.of(requireActivity()).get(AdyenComponentViewModel::class.java)
-        val view = inflater.inflate(R.layout.fragment_payment_methods_list, container, false)
+        val view = inflater.inflate(R.layout.frag_payment_methods_list, container, false)
         addObserver(view.findViewById(R.id.recyclerView_paymentMethods))
         return view
     }

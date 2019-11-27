@@ -177,6 +177,7 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
                             }
                         }
                     }else{
+                        paymentMethodsApiResponse = pmApiResponse
                         showDropInComponent(compData)
                     }
                 } else {
@@ -351,7 +352,7 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
         } catch (e: CheckoutException) {
             Log.e(TAG, "Amount $amount not valid", e)
         }
-
+        
         DropIn.startPayment(context, paymentMethodsApiResponse, dropInConfigurationBuilder.build())
     }
 

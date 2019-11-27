@@ -47,9 +47,9 @@ class PaymentMethodAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
         return when (viewType) {
-            PAYMENT_METHODS_HEADER -> PaymentMethodsHeaderVH(getView(parent, R.layout.payment_methods_list_header))
-            PAYMENT_METHODS_FOOTER -> PaymentMethodsFooterVH(getView(parent, R.layout.payment_methods_list_footer))
-            else -> PaymentMethodVH(getView(parent, R.layout.payment_methods_list_item))
+            PAYMENT_METHODS_HEADER -> PaymentMethodsHeaderVH(getView(parent, R.layout.pm_list_header))
+            PAYMENT_METHODS_FOOTER -> PaymentMethodsFooterVH(getView(parent, R.layout.pm_list_footer))
+            else -> PaymentMethodVH(getView(parent, R.layout.pm_list_item))
         }
     }
 

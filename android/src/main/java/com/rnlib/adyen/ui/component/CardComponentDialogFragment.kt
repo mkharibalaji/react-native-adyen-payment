@@ -15,7 +15,7 @@ import com.adyen.checkout.core.log.Logger
 
 import com.rnlib.adyen.R
 import com.rnlib.adyen.ui.base.BaseComponentDialogFragment
-import kotlinx.android.synthetic.main.fragment_card_component.adyenCardView
+import kotlinx.android.synthetic.main.frag_card_component.adyenCardView
 import kotlinx.android.synthetic.main.view_card_component.view.header
 import kotlinx.android.synthetic.main.view_card_component.view.payButton
 
@@ -26,7 +26,7 @@ class CardComponentDialogFragment : BaseComponentDialogFragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_card_component, container, false)
+        return inflater.inflate(R.layout.frag_card_component, container, false)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

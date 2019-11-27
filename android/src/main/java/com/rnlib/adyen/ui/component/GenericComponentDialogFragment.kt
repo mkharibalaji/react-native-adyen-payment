@@ -20,9 +20,9 @@ import com.rnlib.adyen.R
 import com.rnlib.adyen.getViewFor
 import com.rnlib.adyen.ui.base.BaseComponentDialogFragment
 
-import kotlinx.android.synthetic.main.fragment_generic_component.componentContainer
-import kotlinx.android.synthetic.main.fragment_generic_component.payButton
-import kotlinx.android.synthetic.main.fragment_generic_component.view.header
+import kotlinx.android.synthetic.main.frag_generic_component.componentContainer
+import kotlinx.android.synthetic.main.frag_generic_component.payButton
+import kotlinx.android.synthetic.main.frag_generic_component.view.header
 
 class GenericComponentDialogFragment : BaseComponentDialogFragment() {
 
@@ -34,7 +34,7 @@ class GenericComponentDialogFragment : BaseComponentDialogFragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_generic_component, container, false)
+        return inflater.inflate(R.layout.frag_generic_component, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
