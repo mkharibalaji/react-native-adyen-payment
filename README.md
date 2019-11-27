@@ -70,6 +70,35 @@ import Adyen
   - Add `import com.reactlibrary.AdyenPaymentPackage;` to the imports at the top of the file
   - Add `new AdyenPaymentPackage()` to the list returned by the `getPackages()` method
 
+##### Change the Theme to Material Theme
+  Add the below styles in `android/app/src/main/res/values/styles.xml` - Adyen depends on ThemedComponents or else you will end up with `Caused by: java.lang.IllegalArgumentException: The style on this component requires your app theme to be Theme.MaterialComponents (or a descendant)`
+  
+  ```
+  <resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="android:textColor">#000000</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="AdyenCheckout.TextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">@color/primaryColor</item>
+        <item name="hintTextColor">@color/primaryColor</item>
+        <item name="android:minHeight">@dimen/input_layout_height</item>
+    </style>
+
+    <style name="ThreeDS2Theme" parent="Theme.MaterialComponents.Light.DarkActionBar">
+	    <item name="colorPrimary">@color/colorPrimary</item>
+	    <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+	    <item name="colorAccent">@color/colorAccent</item>
+	</style>
+
+</resources>
+  ```
+
 ##### Add to Progaurd for release
   If you use ProGuard or R8, the following rules should be enough to maintain all expected functionality.
 ```-keep class com.adyen.checkout.base.model.** { *; }
