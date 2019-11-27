@@ -72,12 +72,12 @@ import Adyen
 
 ##### Add to Progaurd for release
   If you use ProGuard or R8, the following rules should be enough to maintain all expected functionality.
-  ```-keep class com.adyen.checkout.base.model.** { *; }
-     -keep class com.adyen.threeds2.** { *; }
-    -keepclassmembers public class * implements com.adyen.checkout.base.PaymentComponent {
-       public <init>(...);
-    }
-    ```
+```-keep class com.adyen.checkout.base.model.** { *; }
+   -keep class com.adyen.threeds2.** { *; }
+  -keepclassmembers public class * implements com.adyen.checkout.base.PaymentComponent {
+     public <init>(...);
+  }
+  ```
     
 ## Usage
 
