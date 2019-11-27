@@ -235,7 +235,7 @@ class AdyenPayment: RCTEventEmitter {
         let appleComponent : [String:Any] = componentData["applepay"] as? [String:Any] ?? [:]
         let cardComponent : [String:Any] = componentData["scheme"] as? [String:Any] ?? [:]
         if(!cardComponent.isEmpty){
-            configuration.card.publicKey = componentData["card_public_key"] as? String
+            configuration.card.publicKey = cardComponent["card_public_key"] as? String
         }
         if(!appleComponent.isEmpty){
             configuration.applePay.merchantIdentifier = appleComponent["apple_pay_merchant_id"] as? String
@@ -354,36 +354,36 @@ class AdyenPayment: RCTEventEmitter {
     }
     
     func finish(with response: PaymentsResponse) {
-        print(response)
         let resultCode : PaymentsResponse.ResultCode = response.resultCode!
-        currentComponent?.stopLoading(withSuccess: true) { [weak self] in
         if(resultCode == .authorised || resultCode == .received || resultCode == .pending){
             let additionalData : NSDictionary = (response.additionalData != nil) ? NSMutableDictionary(dictionary:response.additionalData!) : NSDictionary()
-            self?.sendEvent(
+            print(response)
+            self.sendEvent(
                 withName: "onSuccess",
                 body: ["message": ["resultCode" : resultCode.rawValue,"merchantReference":response.merchantReference!,"pspReference" : response.pspReference!,"additionalData" : additionalData]]
             )
         }else if(resultCode == .refused || resultCode == .error){
-            self?.sendEvent(
+            self.sendEvent(
                 withName: "onError",
                 body: ["code": response.error_code, "message": response.refusalReason]
             )
         }else if (resultCode == .cancelled){
-            self?.sendEvent(
+            self.sendEvent(
                 withName: "onError",
                 body: ["code": "ERROR_CANCELLED", "message": "Transaction Cancelled"]
             )
         }else{
-            self?.sendEvent(
+            self.sendEvent(
                 withName: "onError",
                 body: ["code": "ERROR_UNKNOWN", "message": "Unknown Error"]
             )
         }
-        
-    }
+        currentComponent?.stopLoading(withSuccess: true) { [weak self] in
+            (UIApplication.shared.delegate?.window??.rootViewController)!.dismiss(animated: true) {}
+        }
         redirectComponent = nil
         threeDS2Component = nil
-        (UIApplication.shared.delegate?.window??.rootViewController)!.dismiss(animated: true) {}
+        
     }
     
     func finish(with error: Error) {
@@ -409,13 +409,13 @@ class AdyenPayment: RCTEventEmitter {
     private func presentAlert(with error: Error, retryHandler: (() -> Void)? = nil) {
         let alertController = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
         alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-        (self.currentComponent?.viewController)!.present(alertController, animated: true)
+        (UIApplication.shared.delegate?.window??.rootViewController)!.present(alertController, animated: true)
     }
     
     private func presentAlert(withTitle title: String,message:String?=nil) {
         let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-        (self.currentComponent?.viewController)!.present(alertController, animated: true)
+        (UIApplication.shared.delegate?.window??.rootViewController)!.present(alertController, animated: true)
     }
     
     override func supportedEvents() -> [String]! {
