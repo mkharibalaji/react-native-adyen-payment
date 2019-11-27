@@ -24,5 +24,5 @@ A list of all the features available with Adyen Payment:
 - Use native Adyen Component via Adyen DropIn by default
 
 # Installation
-As `react-native-adyen-payment` is a native navigation library - integrating it into your app will require editing native files. Follow the installation guides in the [documentation](/INSTALLATION.md).
+As `react-native-adyen-payment` is a native library - integrating it into your app will require editing native files. Follow the installation guides in the [documentation](/INSTALLATION.md).
 
