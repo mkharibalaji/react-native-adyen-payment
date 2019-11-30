@@ -30,7 +30,10 @@ export default {
     BCMC,
     WECHAT_PAY_SDK,
     APPLE_PAY,
-    startPayment(component,componentData,paymentDetails,appServiceConfigData){
+    initialize(appServiceConfigData){
+        return AdyenPayment.initialize(appServiceConfigData);
+    },
+    startPaymentPromise(component,componentData,paymentDetails){
         const default_components = [DROPIN,IDEAL,MOLPAY_MALAYSIA,MOLPAY_THAILAND,MOLPAY_VIETNAM,DOTPAY,
             EPS,ENTERCASH,OPEN_BANKING,SCHEME,SEPA];
         var supported_components;
@@ -41,9 +44,24 @@ export default {
             supported_components = [WECHAT_PAY_SDK,GOOGLE_PAY];
         }
         if(default_components.indexOf(component) !== -1 || supported_components.indexOf(component) !== -1){
-            return AdyenPayment.startPayment(component,componentData,paymentDetails,appServiceConfigData)
+            return AdyenPayment.startPaymentPromise(component,componentData,paymentDetails)
         }else{
-            //mOnError("ERROR_VALIDATION", `${component} is not supported for ${Platform.OS} Platform`);
+            throw new Error(`${component} is not supported for ${Platform.OS} Platform`);
+        }
+    },
+    startPayment(component,componentData,paymentDetails){
+        const default_components = [DROPIN,IDEAL,MOLPAY_MALAYSIA,MOLPAY_THAILAND,MOLPAY_VIETNAM,DOTPAY,
+            EPS,ENTERCASH,OPEN_BANKING,SCHEME,SEPA];
+        var supported_components;
+        if(Platform.OS === 'ios'){
+            supported_components = [APPLE_PAY];
+        }
+        else if (Platform.OS  === 'android') {
+            supported_components = [WECHAT_PAY_SDK,GOOGLE_PAY];
+        }
+        if(default_components.indexOf(component) !== -1 || supported_components.indexOf(component) !== -1){
+            return AdyenPayment.startPayment(component,componentData,paymentDetails)
+        }else{
             throw new Error(`${component} is not supported for ${Platform.OS} Platform`);
         }
     },
@@ -57,6 +75,9 @@ export default {
      */
     onSuccess(mOnSuccess) {
         this._validateParam(mOnSuccess, 'onSuccess', 'function');
+        if (onAdyenPaymentSuccessListener) {
+          onAdyenPaymentSuccessListener.remove();
+        }
         onAdyenPaymentSuccessListener = events.addListener('onSuccess', (response) => {
             mOnSuccess(response['message']);
         });
@@ -72,6 +93,9 @@ export default {
      */
     onError(mOnError) {
         this._validateParam(mOnError, 'onError', 'function');
+        if (onAdyenPaymentErrorListener) {
+          onAdyenPaymentErrorListener.remove();
+        }
         onAdyenPaymentErrorListener = events.addListener('onError', (response) => {
             mOnError(response['code'], response['message']);
         });

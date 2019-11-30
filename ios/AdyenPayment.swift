@@ -12,6 +12,9 @@ class AdyenPayment: RCTEventEmitter {
     var componentData : NSDictionary?
     var component : String?
     var vSpinner : UIView?
+    var resolve: RCTPromiseResolveBlock?
+    var reject: RCTPromiseRejectBlock?
+    var emitEvent : Bool = false
     
     lazy var apiClient = APIClient()
     
@@ -165,31 +168,31 @@ class AdyenPayment: RCTEventEmitter {
         }
     }
     
-    @objc func startPayment(_ component: NSString,componentData : NSDictionary,paymentDetails : NSDictionary,appServiceConfigData : NSDictionary){
+    @objc func initialize(_ appServiceConfigData : NSDictionary){
+        self.setAppServiceConfigDetails(appServiceConfigData)
+    }
+    
+    @objc func startPaymentPromise(_ component: NSString,componentData : NSDictionary,paymentDetails : NSDictionary,resolve: @escaping RCTPromiseResolveBlock,reject: @escaping RCTPromiseRejectBlock){
+        self.resolve = resolve
+        self.reject = reject
+        self.showPayment(component,componentData : componentData,paymentDetails : paymentDetails)
+    }
+    
+    @objc func startPayment(_ component: NSString,componentData : NSDictionary,paymentDetails : NSDictionary){
+        self.emitEvent = true
+        self.showPayment(component,componentData : componentData,paymentDetails : paymentDetails)
+    }
+    
+    func showPayment(_ component: NSString,componentData : NSDictionary,paymentDetails : NSDictionary){
         DispatchQueue.main.async {
             let rootViewController = UIApplication.shared.delegate?.window??.rootViewController
             self.showSpinner(onView: rootViewController!.view)
         }
         self.setPaymentDetails(paymentDetails)
-        self.setAppServiceConfigDetails(appServiceConfigData)
         self.componentData = componentData
         self.component = component as String
         let request = PaymentMethodsRequest()
         self.apiClient.perform(request, completionHandler: self.paymentMethodsResponseHandler)
-
-        /*DispatchQueue.main.async {
-                let request = PaymentMethodsRequest()
-                self.apiClient.perform(request) { result in
-                    switch result {
-                    case let .success(response):
-                        self.paymentMethods = response.paymentMethods
-                        self.startPayment(component as String,componentData: componentData)
-                    case let .failure(error):
-                        self.presentAlert(withTitle:"Error",message: error.localizedDescription)
-                    }
-                }
-        }*/
-        
     }
     
     func paymentMethodsResponseHandler(result: Result<PaymentMethodsResponse, Error>) {
@@ -201,6 +204,24 @@ class AdyenPayment: RCTEventEmitter {
             case let .failure(error):
                 self.presentAlert(withTitle:"Error",message: error.localizedDescription)
             }
+    }
+
+    func sendSuccess(message : Dictionary<String, Any>?){
+        if(self.resolve != nil){
+            self.resolve!(message)
+        }
+        if(self.emitEvent){
+            self.sendEvent(withName: "onSuccess",body: ["message": message])
+        }
+    }
+    
+    func sendFailure(code : String,message : String){
+        if(self.reject != nil){
+            self.reject!(code, message,nil)
+        }
+        if(self.emitEvent){
+            self.sendEvent(withName: "onError",body: ["code": code, "message": message])
+        }
     }
     
     func startPayment(_ component : String,componentData : NSDictionary){
@@ -217,16 +238,10 @@ class AdyenPayment: RCTEventEmitter {
                 case "ideal","entercash","eps","dotpay","openbanking_UK","molpay_ebanking_fpx_MY","molpay_ebanking_TH","molpay_ebanking_VN":
                     try self.showIssuerComponent(component,componentData : componentData)
                 default :
-                    self.sendEvent(
-                        withName: "onError",
-                        body: ["code": "ERROR_UNKNOWN_PAYMENT_METHOD", "message": "Unknown Payment Method"]
-                    )
+                    self.sendFailure(code : "ERROR_UNKNOWN_PAYMENT_METHOD",message: "Unknown Payment Method")
             }
         } catch  {
-            self.sendEvent(
-                withName: "onError",
-                body: ["code": "ERROR_UNKNOWN", "message": error]
-            )
+            self.sendFailure(code : "ERROR_UNKNOWN",message: error.localizedDescription)
         }
     }
     
@@ -358,25 +373,14 @@ class AdyenPayment: RCTEventEmitter {
         if(resultCode == .authorised || resultCode == .received || resultCode == .pending){
             let additionalData : NSDictionary = (response.additionalData != nil) ? NSMutableDictionary(dictionary:response.additionalData!) : NSDictionary()
             print(response)
-            self.sendEvent(
-                withName: "onSuccess",
-                body: ["message": ["resultCode" : resultCode.rawValue,"merchantReference":response.merchantReference!,"pspReference" : response.pspReference!,"additionalData" : additionalData]]
-            )
+            let msg:Dictionary? = ["resultCode" : resultCode.rawValue,"merchantReference":response.merchantReference!,"pspReference" : response.pspReference!,"additionalData" : additionalData]
+            self.sendSuccess(message:msg)
         }else if(resultCode == .refused || resultCode == .error){
-            self.sendEvent(
-                withName: "onError",
-                body: ["code": response.error_code, "message": response.refusalReason]
-            )
+            self.sendFailure(code : response.error_code ?? "",message: response.refusalReason ?? "")
         }else if (resultCode == .cancelled){
-            self.sendEvent(
-                withName: "onError",
-                body: ["code": "ERROR_CANCELLED", "message": "Transaction Cancelled"]
-            )
+            self.sendFailure(code : "ERROR_CANCELLED",message: "Transaction Cancelled")
         }else{
-            self.sendEvent(
-                withName: "onError",
-                body: ["code": "ERROR_UNKNOWN", "message": "Unknown Error"]
-            )
+            self.sendFailure(code : "ERROR_UNKNOWN",message: "Unknown Error")
         }
         currentComponent?.stopLoading(withSuccess: true) { [weak self] in
             (UIApplication.shared.delegate?.window??.rootViewController)!.dismiss(animated: true) {}
@@ -389,15 +393,9 @@ class AdyenPayment: RCTEventEmitter {
     func finish(with error: Error) {
         let isCancelled = ((error as? ComponentError) == .cancelled)
         if !isCancelled {
-            self.sendEvent(
-                withName: "onError",
-                body: ["code": "ERROR_GENERAL", "message": "Payment has error"]
-            )
+            self.sendFailure(code : "ERROR_GENERAL",message: "Payment has error")
         }else{
-            self.sendEvent(
-                withName: "onError",
-                body: ["code": "ERROR_CANCELLED", "message": "Transaction Cancelled"]
-            )
+            self.sendFailure(code : "ERROR_CANCELLED",message: "Transaction Cancelled")
         }
         redirectComponent = nil
         threeDS2Component = nil

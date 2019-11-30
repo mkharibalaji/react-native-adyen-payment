@@ -116,8 +116,12 @@ class AdyenComponentActivity : AppCompatActivity(), DropInBottomSheetDialogFragm
 
     private val googlePayErrorObserver: Observer<ComponentError> = Observer {
         Logger.d(TAG, "GooglePay error - ${it?.errorMessage}")
-        terminateDropIn()
-        //showPaymentMethodsDialog(true)
+        val errObj : JSONObject = JSONObject()
+        errObj.put("resultType","ERROR")
+        val code = if (it != null) {"ERROR_GENERAL"} else {"ERROR_CANCELLED"}
+        errObj.put("code",code)
+        errObj.put("message",it?.errorMessage.toString())
+        this.sendResult(errObj.toString())
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -132,21 +136,11 @@ class AdyenComponentActivity : AppCompatActivity(), DropInBottomSheetDialogFragm
 
         adyenComponentViewModel = ViewModelProviders.of(this).get(AdyenComponentViewModel::class.java)
 
-        adyenComponentConfiguration = if (savedInstanceState != null && savedInstanceState.containsKey(ADYEN_COMPONENT_CONFIGURATION_KEY)) {
-            savedInstanceState.getParcelable(ADYEN_COMPONENT_CONFIGURATION_KEY)!!
-        } else {
-            intent.getParcelableExtra(ADYEN_COMPONENT_CONFIGURATION_KEY)
-        }
+        adyenComponentConfiguration = intent.getParcelableExtra(ADYEN_COMPONENT_CONFIGURATION_KEY)
 
         adyenComponentViewModel.adyenComponentConfiguration = adyenComponentConfiguration
 
-        adyenComponentViewModel.paymentMethodsApiResponse =
-            if (savedInstanceState != null && savedInstanceState.containsKey(PAYMENT_METHODS_RESPONSE_KEY)) {
-                savedInstanceState.getParcelable(PAYMENT_METHODS_RESPONSE_KEY)!!
-            } else {
-                intent.getParcelableExtra(PAYMENT_METHODS_RESPONSE_KEY)
-            }
-
+        adyenComponentViewModel.paymentMethodsApiResponse = intent.getParcelableExtra(PAYMENT_METHODS_RESPONSE_KEY)
         val paymentMethod : PaymentMethod = adyenComponentViewModel.paymentMethodsApiResponse.paymentMethods!![0]
         when (paymentMethod.type) {
             PaymentMethodTypes.SCHEME -> {

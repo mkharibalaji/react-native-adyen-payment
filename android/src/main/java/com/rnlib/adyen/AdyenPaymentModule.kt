@@ -29,6 +29,7 @@ import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.WritableArray
 import com.facebook.react.bridge.WritableMap
 import com.facebook.react.bridge.ReadableMap
+import com.facebook.react.bridge.Promise
 
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import okhttp3.OkHttpClient
@@ -70,6 +71,8 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
 
     
     private val loadingDialog  = LoadingDialogFragment.newInstance()
+    private var promise: Promise? = null
+    private var emitEvent : Boolean = false
 
     private val mActivityEventListener = object:BaseActivityEventListener() {
         override fun onActivityResult(activity:Activity, requestCode:Int, resultCode:Int, data:Intent) {
@@ -84,6 +87,7 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
         private var paymentData : JSONObject = JSONObject()
         private val configData : AppServiceConfigData = AppServiceConfigData()
         private var paymentMethodsApiResponse : PaymentMethodsApiResponse = PaymentMethodsApiResponse()
+
         fun  getPaymentData(): JSONObject{
            return paymentData
         }
@@ -112,10 +116,34 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
         return amount;
     }
 
+    fun sendSuccess(message : JSONObject){
+        if(promise != null){
+            promise!!.resolve(ReactNativeUtils.convertJsonToMap(message))
+        }
+        if(emitEvent){
+            emitEvent = false
+            val evtObj : JSONObject = JSONObject()
+            evtObj.put("message",message)
+            emitDeviceEvent("onSuccess",ReactNativeUtils.convertJsonToMap(evtObj))
+        }
+    }
+    
+    fun sendFailure(code : String,message : String){
+        if(promise != null){
+            promise!!.reject(code, message)
+            //this.promise = null
+        }
+        if(emitEvent){
+            emitEvent = false
+            val evtObj : JSONObject = JSONObject()
+            evtObj.put("code",code)
+            evtObj.put("message",message)
+            emitDeviceEvent("onError",ReactNativeUtils.convertJsonToMap(evtObj))
+        }
+    }
+
     @ReactMethod
-    fun startPayment(component : String,componentData : ReadableMap,paymentDetails : ReadableMap,appServiceConfigData : ReadableMap) {
-        paymentData = ReactNativeUtils.convertMapToJson(paymentDetails)
-        val compData = ReactNativeUtils.convertMapToJson(componentData)
+    fun initialize(appServiceConfigData : ReadableMap){
         val appServiceConfigJSON : JSONObject = ReactNativeUtils.convertMapToJson(appServiceConfigData)
         val headersMap: MutableMap<String, String> = linkedMapOf()
         headersMap.put("Accept", "application/json")
@@ -128,15 +156,29 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
         configData.environment = appServiceConfigJSON.getString("environment")
         configData.base_url = appServiceConfigJSON.getString("base_url")
         configData.app_url_headers = headersMap
+    }
+    
+    @ReactMethod
+    fun startPaymentPromise(component : String,componentData : ReadableMap,paymentDetails : ReadableMap,promise : Promise){
+        this.promise = promise
+        this.showPayment(component,componentData,paymentDetails)
+    }
+
+    @ReactMethod
+    fun startPayment(component : String,componentData : ReadableMap,paymentDetails : ReadableMap) {
+        this.emitEvent = true
+        this.showPayment(component,componentData,paymentDetails)
+    }
+
+    fun showPayment(component : String,componentData : ReadableMap,paymentDetails : ReadableMap) {
+        paymentData = ReactNativeUtils.convertMapToJson(paymentDetails)
+        val compData = ReactNativeUtils.convertMapToJson(componentData)
         val additionalData: MutableMap<String, String> = linkedMapOf()
         val paymentMethodReq : PaymentMethodsRequest = PaymentMethodsRequest(paymentData.getString("merchantAccount"),
             paymentData.getString("shopperReference"),additionalData,ArrayList<String>(),getAmt(paymentData.getJSONObject("amount")),
                  ArrayList<String>(),paymentData.getString("countryCode"),paymentData.getString("shopperLocale"),"Android")
 
         val paymentMethods : Call<ResponseBody> = ApiService.checkoutApi(configData.base_url).paymentMethods(configData.app_url_headers,paymentMethodReq)
-        /*
-        public static final String  = "sepadirectdebit";
-        public static final String WECHAT_PAY_SDK = "wechatpaySDK";*/
         setLoading(true)
         paymentMethods.enqueue(object : retrofit2.Callback<ResponseBody> {
             override fun onResponse(call : Call<ResponseBody>,response : Response<ResponseBody>) {
@@ -382,9 +424,12 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
                 message.put("merchantReference", detailsResponse.getString("merchantReference"))
                 message.put("pspReference", detailsResponse.getString("pspReference"))
                 message.put("additionalData", detailsResponse.getJSONObject("additionalData"))
-                val evtObj : JSONObject = JSONObject()
+
+                sendSuccess(message)
+
+                /*val evtObj : JSONObject = JSONObject()
                 evtObj.put("message",message)
-                emitDeviceEvent("onSuccess",ReactNativeUtils.convertJsonToMap(evtObj))
+                emitDeviceEvent("onSuccess",ReactNativeUtils.convertJsonToMap(evtObj))*/
             }else if(rsCode == "Refused" || rsCode == "Error"){
                 val evtObj : JSONObject = JSONObject()
                 val err_refusal_code = detailsResponse.getString("refusalReasonCode")
@@ -425,41 +470,47 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
                     "38" -> "ERROR_AUTH_REQUIRED"
                     else -> "ERROR_UNKNOWN"
                 }
-                evtObj.put("code",err_code)
+                sendFailure(err_code,detailsResponse.getString("refusalReason"))
+                /*evtObj.put("code",err_code)
                 evtObj.put("message",detailsResponse.getString("refusalReason"))
-                emitDeviceEvent("onError",ReactNativeUtils.convertJsonToMap(evtObj))
+                emitDeviceEvent("onError",ReactNativeUtils.convertJsonToMap(evtObj))*/
             }else if(rsCode == "Cancelled"){
-                val evtObj : JSONObject = JSONObject()
+                sendFailure("ERROR_CANCELLED","Transaction Cancelled")
+                /*val evtObj : JSONObject = JSONObject()
                 evtObj.put("code","ERROR_CANCELLED")
                 evtObj.put("message","Transaction Cancelled")
-                emitDeviceEvent("onError",ReactNativeUtils.convertJsonToMap(evtObj))
+                emitDeviceEvent("onError",ReactNativeUtils.convertJsonToMap(evtObj))*/
             }else{
-                val evtObj : JSONObject = JSONObject()
+                sendFailure("ERROR_UNKNOWN","Unknown Error")
+                /*val evtObj : JSONObject = JSONObject()
                 evtObj.put("code","ERROR_UNKNOWN")
                 evtObj.put("message","Unknown Error")
-                emitDeviceEvent("onError",ReactNativeUtils.convertJsonToMap(evtObj))
+                emitDeviceEvent("onError",ReactNativeUtils.convertJsonToMap(evtObj))*/
             }
         }else if (resultType=="ERROR"){
-            val evtObj : JSONObject = JSONObject()
+            sendFailure(response.get("code").toString(),response.get("message").toString())
+            /*val evtObj : JSONObject = JSONObject()
             evtObj.put("code",response.get("code").toString())
             evtObj.put("message",response.get("message").toString())
-            emitDeviceEvent("onError",ReactNativeUtils.convertJsonToMap(evtObj))
+            emitDeviceEvent("onError",ReactNativeUtils.convertJsonToMap(evtObj))*/
         }else{
-            val evtObj : JSONObject = JSONObject()
+            sendFailure("ERROR_UNKNOWN","Unknown Error")
+            /*val evtObj : JSONObject = JSONObject()
             evtObj.put("code","ERROR_UNKNOWN")
             evtObj.put("message","Unknown Error")
-            emitDeviceEvent("onError",ReactNativeUtils.convertJsonToMap(evtObj))
+            emitDeviceEvent("onError",ReactNativeUtils.convertJsonToMap(evtObj))*/
         }
     }
 
     private fun parseActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         Log.d(TAG, "parseActivityResult")
         if (requestCode == DropIn.DROP_IN_REQUEST_CODE && resultCode == Activity.RESULT_CANCELED) {
+            sendFailure("ERROR_CANCELLED","Dropin Cancelled")
             Log.d(TAG, "DropIn CANCELED")
-            val evtObj : JSONObject = JSONObject()
+            /*val evtObj : JSONObject = JSONObject()
             evtObj.put("code","ERROR_CANCELLED")
             evtObj.put("message","Dropin Cancelled")
-            emitDeviceEvent("onError",ReactNativeUtils.convertJsonToMap(evtObj))
+            emitDeviceEvent("onError",ReactNativeUtils.convertJsonToMap(evtObj))*/
         }
     }
 
