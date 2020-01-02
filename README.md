@@ -1,4 +1,4 @@
-# react-native-adyen-payment -- Work In Progress
+# react-native-adyen-payment
 
 <h1 align="center" style="vertical-align:middle;">
   <img src="https://mkharibalaji.github.io/react-native-adyen-payment/adyen-logo-green.png" width="350" />
@@ -11,7 +11,7 @@
   <br><br>
 </h1>
 
-React Native Adyen Payment provides 100% native Adyen Payment on both iOS and Android for React Native apps. The JavaScript API is simple and cross-platform - just install it in your app and give your users the native feel they deserve. Ready to get started? Check out the [docs](https://mkharibalaji.github.io/react-native-adyen-payment/#/INSTALLATION).
+React Native Adyen Payment provides 100% native Adyen Payment on both iOS and Android for React Native apps. The JavaScript API is simple and cross-platform - just install it in your app and complete the payments. Ready to get started? Check out the [docs](https://mkharibalaji.github.io/react-native-adyen-payment/#/INSTALLATION).
 
 # Features
 
