@@ -254,7 +254,8 @@ class AdyenPayment: RCTEventEmitter {
         }
         if(!appleComponent.isEmpty){
             configuration.applePay.merchantIdentifier = appleComponent["apple_pay_merchant_id"] as? String
-            let amt = NSDecimalNumber(string: String(format: "%.2f", Float((PaymentsData.amount.value) / 100)))
+            // let amt = NSDecimalNumber(string: String(format: "%.2f", Float((PaymentsData.amount.value) / 100)))
+            let amt = NSDecimalNumber(string: String(format: "%.2f", Float(PaymentsData.amount.value) / 100))
             let applePaySummaryItems = [PKPaymentSummaryItem(label: "Total", amount: amt, type: .final)]
             configuration.applePay.summaryItems = applePaySummaryItems
         }
