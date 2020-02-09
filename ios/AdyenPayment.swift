@@ -118,6 +118,18 @@ class AdyenPayment: RCTEventEmitter {
             self.present(component)
         }
     }
+    
+    func showBCMCComponent(_ componentData : NSDictionary)throws {
+           DispatchQueue.main.async {
+               guard let paymentMethod = self.paymentMethods?.paymentMethod(ofType: BCMCPaymentMethod.self) else { return }
+            let bcmcComponent : [String:Any] = componentData["bcmc"] as? [String:Any] ?? [:]
+            if(!bcmcComponent.isEmpty){
+                let component = BCMCComponent(paymentMethod: paymentMethod, publicKey: bcmcComponent["card_public_key"] as! String)
+                    component.delegate = self
+                    self.present(component)
+                }
+            }
+       }
 
     
     func showSEPADirectDebitComponent(_ componentData : NSDictionary)throws {
@@ -134,16 +146,18 @@ class AdyenPayment: RCTEventEmitter {
             guard let paymentMethod = self.paymentMethods?.paymentMethod(ofType: ApplePayPaymentMethod.self) else { return }
             let appleComponent : [String:Any] = componentData["applepay"] as? [String:Any] ?? [:]
             guard appleComponent["apple_pay_merchant_id"] != nil else {return}
-            // let amt = NSDecimalNumber(string: String(format: "%.2f", Float((PaymentsData.amount.value) / 100)))
-            let amt = NSDecimalNumber(string: String(format: "%.2f", Float(PaymentsData.amount.value) / 100))
-            let applePaySummaryItems = [PKPaymentSummaryItem(label: "Total", amount: amt, type: .final)]
-            
-            let component = ApplePayComponent(paymentMethod: paymentMethod,payment:Payment(amount: PaymentsData.amount, countryCode: PaymentsData.countryCode),merchantIdentifier: appleComponent["apple_pay_merchant_id"] as! String,summaryItems: applePaySummaryItems)
-            if(component != nil){
-                component?.delegate = self
-                self.present(component!)
+            do{
+                let amt = NSDecimalNumber(string: String(format: "%.2f", Float(PaymentsData.amount.value) / 100))
+                let applePaySummaryItems = [PKPaymentSummaryItem(label: "Total", amount: amt, type: .final)]
+                let component = try ApplePayComponent(paymentMethod: paymentMethod,payment:Payment(amount: PaymentsData.amount, countryCode: PaymentsData.countryCode),merchantIdentifier: appleComponent["apple_pay_merchant_id"] as! String,summaryItems: applePaySummaryItems)
+                component.delegate = self
+                self.present(component)
+            }catch let appleError as ApplePayComponent.Error{
+                self.sendFailure(code :"ERROR_APPLE_PAY",message: appleError.errorDescription!)
+            }catch{
+                self.sendFailure(code :"ERROR_GENERAL",message: error.localizedDescription)
             }
-        }
+      }
     }
     
     func showDropInComponent(configuration : DropInComponent.PaymentMethodsConfiguration) {
@@ -203,6 +217,7 @@ class AdyenPayment: RCTEventEmitter {
                 self.paymentMethods = response.paymentMethods
                 self.startPayment(self.component!,componentData: self.componentData!)
             case let .failure(error):
+                //self.sendFailure(code :"ERROR_GENERAL",message: error.localizedDescription)
                 self.presentAlert(withTitle:"Error",message: error.localizedDescription)
             }
     }
@@ -238,6 +253,8 @@ class AdyenPayment: RCTEventEmitter {
                     try self.showSEPADirectDebitComponent(componentData)
                 case "ideal","entercash","eps","dotpay","openbanking_UK","molpay_ebanking_fpx_MY","molpay_ebanking_TH","molpay_ebanking_VN":
                     try self.showIssuerComponent(component,componentData : componentData)
+                case "bcmc":
+                    try self.showBCMCComponent(componentData)
                 default :
                     self.sendFailure(code : "ERROR_UNKNOWN_PAYMENT_METHOD",message: "Unknown Payment Method")
             }
@@ -252,6 +269,10 @@ class AdyenPayment: RCTEventEmitter {
         let cardComponent : [String:Any] = componentData["scheme"] as? [String:Any] ?? [:]
         if(!cardComponent.isEmpty){
             configuration.card.publicKey = cardComponent["card_public_key"] as? String
+        }
+        let bcmcComponent : [String:Any] = componentData["bcmc"] as? [String:Any] ?? [:]
+        if(!bcmcComponent.isEmpty){
+            configuration.card.publicKey = bcmcComponent["card_public_key"] as? String
         }
         if(!appleComponent.isEmpty){
             configuration.applePay.merchantIdentifier = appleComponent["apple_pay_merchant_id"] as? String

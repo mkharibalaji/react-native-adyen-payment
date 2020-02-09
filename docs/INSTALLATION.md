@@ -64,7 +64,22 @@ import Adyen
   return handledAdyen;
 }
 ```
-  
+3 . Configure info.plist with CFBundleURL for redirect URL in the PaymentData
+```xml
+<key>CFBundleURLTypes</key>
+  <array>
+    <dict>
+      <key>CFBundleTypeRole</key>
+      <string>Editor</string>
+      <key>CFBundleURLName</key>
+      <string>YOUR_APP_BUNDLE_NAME_UNIQUE(com.xxxx.xxxx)</string>
+      <key>CFBundleURLSchemes</key>
+      <array>
+        <string>YOUR_APP_URL_FOR_REDIRECT(Ex : CFBundleDisplayName-app)</string>
+      </array>
+    </dict>
+  </array>
+```
 ### Android
 
 #### Optional Step if autolinking didn't work

@@ -35,7 +35,7 @@ export default {
     },
     startPaymentPromise(component,componentData,paymentDetails){
         const default_components = [DROPIN,IDEAL,MOLPAY_MALAYSIA,MOLPAY_THAILAND,MOLPAY_VIETNAM,DOTPAY,
-            EPS,ENTERCASH,OPEN_BANKING,SCHEME,SEPA];
+            EPS,ENTERCASH,OPEN_BANKING,SCHEME,SEPA,BCMC];
         var supported_components;
         if(Platform.OS === 'ios'){
             supported_components = [APPLE_PAY];
@@ -51,7 +51,7 @@ export default {
     },
     startPayment(component,componentData,paymentDetails){
         const default_components = [DROPIN,IDEAL,MOLPAY_MALAYSIA,MOLPAY_THAILAND,MOLPAY_VIETNAM,DOTPAY,
-            EPS,ENTERCASH,OPEN_BANKING,SCHEME,SEPA];
+            EPS,ENTERCASH,OPEN_BANKING,SCHEME,SEPA,BCMC];
         var supported_components;
         if(Platform.OS === 'ios'){
             supported_components = [APPLE_PAY];
