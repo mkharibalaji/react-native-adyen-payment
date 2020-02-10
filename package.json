@@ -5,7 +5,8 @@
   "description": "React Native Adyen Payment Native Module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "release": "release-it"
   },
   "repository": {
     "type": "git",
@@ -13,7 +14,10 @@
     "baseUrl": "https://github.com/mkharibalaji/react-native-adyen-payment"
   },
   "keywords": [
-    "react-native","Adyen","React Native","Adyen Payment"
+    "react-native",
+    "Adyen",
+    "React Native",
+    "Adyen Payment"
   ],
   "author": {
     "name": "M K Hari Balaji",
@@ -22,12 +26,21 @@
   "license": "MIT",
   "licenseFilename": "LICENSE",
   "readmeFilename": "README.md",
+  "release-it": {
+    "git": {
+      "tagName": "v${version}"
+    },
+    "github": {
+      "release": true
+    }
+  },
   "peerDependencies": {
     "react": "^16.8.3",
     "react-native": ">=0.60.0 <1.0.x"
   },
   "devDependencies": {
     "react": "^16.8.3",
-    "react-native": "^0.60.0"
+    "react-native": "^0.60.0",
+    "release-it": "^12.4.3"
   }
 }
