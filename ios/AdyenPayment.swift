@@ -309,7 +309,20 @@ class AdyenPayment: RCTEventEmitter {
  */
     
     func present(_ component: PresentableComponent) {
-        component.environment = (AppServiceConfigData.environment == "test") ? Environment.test : Environment.live
+        switch(AppServiceConfigData.environment){
+            case "test":
+                component.environment = Environment.test
+            case "live":
+                component.environment = Environment.live
+            case "eu":
+                component.environment = Environment.liveEurope
+            case "au":
+                component.environment = Environment.liveAustralia
+            case "us":
+                component.environment = Environment.liveUnitedStates
+            default:
+                component.environment = Environment.test
+        }
         let amount = PaymentsData.amount as Payment.Amount
         component.payment = Payment(amount: amount)
         component.payment?.countryCode = PaymentsData.countryCode
