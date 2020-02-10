@@ -88,6 +88,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:${project.ext.kotlinx_version}"
     implementation "com.android.support.constraint:constraint-layout:${project.ext.constraint_layout_version}"
     implementation "com.google.android.gms:play-services-ads-identifier:15.0.0"
+    implementation "com.google.android.gms:play-services-wallet:15.0.0"
 
     implementation 'com.facebook.react:react-native:+'  // From node_modules
     //https://github.com/google/gson
@@ -101,5 +102,5 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-gson:2.6.2'
     annotationProcessor 'com.squareup.retrofit2:retrofit:2.6.2'
     implementation "com.jakewharton.retrofit:retrofit2-kotlin-coroutines-adapter:0.9.2"
-    implementation "com.adyen.checkout:drop-in:3.5.1"
+    implementation "com.adyen.checkout:drop-in:3.6.2"
 }

@@ -19,6 +19,7 @@ const SEPA = "sepadirectdebit";
 const BCMC = "bcmc";
 const WECHAT_PAY_SDK = "wechatpaySDK";
 const APPLE_PAY = "applepay";
+const AFTERPAY="afterpay_default";
 
 export default {
     DROPIN,
@@ -30,6 +31,7 @@ export default {
     BCMC,
     WECHAT_PAY_SDK,
     APPLE_PAY,
+    AFTERPAY,
     initialize(appServiceConfigData){
         return AdyenPayment.initialize(appServiceConfigData);
     },
@@ -41,7 +43,7 @@ export default {
             supported_components = [APPLE_PAY];
         }
         else if (Platform.OS  === 'android') {
-            supported_components = [WECHAT_PAY_SDK,GOOGLE_PAY];
+            supported_components = [WECHAT_PAY_SDK,GOOGLE_PAY,AFTERPAY];
         }
         if(default_components.indexOf(component) !== -1 || supported_components.indexOf(component) !== -1){
             return AdyenPayment.startPaymentPromise(component,componentData,paymentDetails)
@@ -57,7 +59,7 @@ export default {
             supported_components = [APPLE_PAY];
         }
         else if (Platform.OS  === 'android') {
-            supported_components = [WECHAT_PAY_SDK,GOOGLE_PAY];
+            supported_components = [WECHAT_PAY_SDK,GOOGLE_PAY,AFTERPAY];
         }
         if(default_components.indexOf(component) !== -1 || supported_components.indexOf(component) !== -1){
             return AdyenPayment.startPayment(component,componentData,paymentDetails)

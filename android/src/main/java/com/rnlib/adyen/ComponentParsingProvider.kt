@@ -55,6 +55,9 @@ import com.adyen.checkout.sepa.SepaConfiguration
 import com.adyen.checkout.sepa.SepaView
 import com.adyen.checkout.wechatpay.WeChatPayComponent
 import com.adyen.checkout.wechatpay.WeChatPayConfiguration
+import com.adyen.checkout.afterpay.AfterPayComponent
+import com.adyen.checkout.afterpay.AfterPayConfiguration
+import com.adyen.checkout.afterpay.AfterPayView
 
 class ComponentParsingProvider {
     companion object {
@@ -152,6 +155,7 @@ internal fun getProviderForType(type: String): PaymentComponentProvider<PaymentC
         PaymentMethodTypes.SEPA -> SepaComponent.PROVIDER
         PaymentMethodTypes.BCMC -> BcmcComponent.PROVIDER
         PaymentMethodTypes.WECHAT_PAY_SDK -> WeChatPayComponent.PROVIDER
+        PaymentMethodTypes.AFTER_PAY -> AfterPayComponent.PROVIDER
         else -> {
             throw CheckoutException("Unable to find component for type - $type")
         }
@@ -226,6 +230,10 @@ internal fun getComponentFor(
             val weChatPayConfiguration: WeChatPayConfiguration = adyenComponentConfiguration.getConfigurationFor(PaymentMethodTypes.WECHAT_PAY_SDK, context)
             WeChatPayComponent.PROVIDER.get(fragment, paymentMethod, weChatPayConfiguration)
         }
+        PaymentMethodTypes.AFTER_PAY -> {
+            val afterPayConfiguration: AfterPayConfiguration = adyenComponentConfiguration.getConfigurationFor(PaymentMethodTypes.AFTER_PAY, context)
+            AfterPayComponent.PROVIDER.get(fragment, paymentMethod, afterPayConfiguration)
+        }
         else -> {
             throw CheckoutException("Unable to find component for type - ${paymentMethod.type}")
         }
@@ -258,6 +266,7 @@ internal fun getViewFor(
         PaymentMethodTypes.SCHEME -> CardView(context)
         PaymentMethodTypes.SEPA -> SepaView(context)
         PaymentMethodTypes.BCMC -> BcmcView(context)
+        PaymentMethodTypes.AFTER_PAY -> AfterPayView(context)
         // GooglePay and WeChatPay do not require a View in Drop-in
         else -> {
             throw CheckoutException("Unable to find view for type - ${paymentMethod.type}")

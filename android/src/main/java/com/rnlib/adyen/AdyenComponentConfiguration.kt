@@ -29,6 +29,7 @@ import com.adyen.checkout.molpay.MolpayConfiguration
 import com.adyen.checkout.openbanking.OpenBankingConfiguration
 import com.adyen.checkout.sepa.SepaConfiguration
 import com.adyen.checkout.wechatpay.WeChatPayConfiguration
+import com.adyen.checkout.afterpay.AfterPayConfiguration
 import java.util.Locale
 
 /**
@@ -275,6 +276,14 @@ class AdyenComponentConfiguration : Configuration, Parcelable {
          */
         fun addWeChatPaySDKConfiguration(wechatPayConfiguration: WeChatPayConfiguration): Builder {
             availableConfigs[PaymentMethodTypes.WECHAT_PAY_SDK] = wechatPayConfiguration
+            return this
+        }
+
+        /**
+         * Add configuration for Sepa payment method.
+         */
+        fun addAfterPayConfiguration(afterPayConfiguration: AfterPayConfiguration): Builder {
+            availableConfigs[PaymentMethodTypes.AFTER_PAY] = afterPayConfiguration
             return this
         }
 

@@ -61,6 +61,9 @@ import com.adyen.checkout.dotpay.DotpayConfiguration
 import com.adyen.checkout.openbanking.OpenBankingConfiguration
 import com.adyen.checkout.sepa.SepaConfiguration
 import com.adyen.checkout.wechatpay.WeChatPayConfiguration
+import com.adyen.checkout.afterpay.AfterPayConfiguration
+
+import com.google.android.gms.wallet.WalletConstants
 
 import com.rnlib.adyen.ui.LoadingDialogFragment
 import androidx.fragment.app.DialogFragment
@@ -211,6 +214,7 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
                             PaymentMethodTypes.SEPA -> showSEPAComponent(compData)
                             PaymentMethodTypes.BCMC -> showBCMCComponent(compData)
                             PaymentMethodTypes.WECHAT_PAY_SDK -> showWeChatPayComponent(component,compData)
+                            PaymentMethodTypes.AFTER_PAY -> showAfterPayComponent(compData)
                             else -> {
                                 val evtObj : JSONObject = JSONObject()
                                 evtObj.put("code","ERROR_UNKNOWN_PAYMENT_METHOD")
@@ -246,7 +250,16 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
             resultIntent,
             AdyenComponentService::class.java
         )
-        adyenConfigurationBuilder.setEnvironment(Environment.TEST)
+        when (configData.environment) {
+            "test" -> {adyenConfigurationBuilder.setEnvironment(Environment.TEST)}
+            "eu" -> {adyenConfigurationBuilder.setEnvironment(Environment.EUROPE)}
+            "us" -> {adyenConfigurationBuilder.setEnvironment(Environment.UNITED_STATES)}
+            "au" -> {adyenConfigurationBuilder.setEnvironment(Environment.AUSTRALIA)}
+            else -> {
+                adyenConfigurationBuilder.setEnvironment(Environment.TEST)
+            }
+        }
+        //adyenConfigurationBuilder.setEnvironment(Environment.TEST)
         val shoppersLocale = Locale(paymentData.getString("shopperLocale").toLowerCase().split("_")[0])
         adyenConfigurationBuilder.setShopperLocale(shoppersLocale)
         try {
@@ -349,10 +362,39 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
 
     private fun showGooglePayComponent(componentData : JSONObject){
         val context = getReactApplicationContext()
-        val googlePayConfig = GooglePayConfiguration.Builder(context,paymentData.getString("merchantAccount")).build()
+        val googlePayConfigBuilder = GooglePayConfiguration.Builder(context,paymentData.getString("merchantAccount"))
+        when (configData.environment) {
+            "test" -> {googlePayConfigBuilder.setGooglePayEnvironment(WalletConstants.ENVIRONMENT_TEST)}
+            "live" -> {googlePayConfigBuilder.setGooglePayEnvironment(WalletConstants.ENVIRONMENT_PRODUCTION)}
+            "eu" -> {googlePayConfigBuilder.setGooglePayEnvironment(WalletConstants.ENVIRONMENT_PRODUCTION)}
+            "us" -> {googlePayConfigBuilder.setGooglePayEnvironment(WalletConstants.ENVIRONMENT_PRODUCTION)}
+            "au" -> {googlePayConfigBuilder.setGooglePayEnvironment(WalletConstants.ENVIRONMENT_PRODUCTION)}
+            else -> {
+                googlePayConfigBuilder.setGooglePayEnvironment(WalletConstants.ENVIRONMENT_PRODUCTION)
+            }
+        }
+        googlePayConfigBuilder.setCountryCode(paymentData.getString("countryCode"))
+        val googlePayConfig = googlePayConfigBuilder.build()
         val configBuilder : AdyenComponentConfiguration.Builder = createConfigurationBuilder(context)
         configBuilder.addGooglePayConfiguration(googlePayConfig)
         AdyenComponent.startPayment(context, paymentMethodsApiResponse, configBuilder.build())
+    }
+
+    private fun showAfterPayComponent(componentData : JSONObject){
+        val context = getReactApplicationContext()
+        var afterPayConfig : AfterPayConfiguration? = null
+        if(componentData.length() != 0){
+            afterPayConfig =  when (componentData.getString("countryCode")) {
+                "NL" -> {AfterPayConfiguration.Builder(context, AfterPayConfiguration.CountryCode.NL).build()}
+                "BE" -> {AfterPayConfiguration.Builder(context, AfterPayConfiguration.CountryCode.BE).build()}
+                else -> null
+            }   
+        }
+        if(afterPayConfig != null){
+            val configBuilder : AdyenComponentConfiguration.Builder = createConfigurationBuilder(context)
+            configBuilder.addAfterPayConfiguration(afterPayConfig)
+            AdyenComponent.startPayment(context, paymentMethodsApiResponse, configBuilder.build())
+        }
     }
  
     private fun showDropInComponent(componentData : JSONObject) {
@@ -360,8 +402,20 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
         Log.d(TAG, "startDropIn")
         val context = getReactApplicationContext()
 
-        val googlePayConfig = GooglePayConfiguration.Builder(context,paymentData.getString("merchantAccount"))
-                                .build()
+        val googlePayConfigBuilder = GooglePayConfiguration.Builder(context,paymentData.getString("merchantAccount"))
+        when (configData.environment) {
+            "test" -> {googlePayConfigBuilder.setGooglePayEnvironment(WalletConstants.ENVIRONMENT_TEST)}
+            "live" -> {googlePayConfigBuilder.setGooglePayEnvironment(WalletConstants.ENVIRONMENT_PRODUCTION)}
+            "eu" -> {googlePayConfigBuilder.setGooglePayEnvironment(WalletConstants.ENVIRONMENT_PRODUCTION)}
+            "us" -> {googlePayConfigBuilder.setGooglePayEnvironment(WalletConstants.ENVIRONMENT_PRODUCTION)}
+            "au" -> {googlePayConfigBuilder.setGooglePayEnvironment(WalletConstants.ENVIRONMENT_PRODUCTION)}
+            else -> {
+                googlePayConfigBuilder.setGooglePayEnvironment(WalletConstants.ENVIRONMENT_PRODUCTION)
+            }
+        }
+        googlePayConfigBuilder.setCountryCode(paymentData.getString("countryCode"))
+        val googlePayConfig = googlePayConfigBuilder.build()
+
         val cardComponent : JSONObject = componentData.getJSONObject(PaymentMethodTypes.SCHEME)
         val cardConfiguration = CardConfiguration.Builder(context, cardComponent.getString("card_public_key"))
                             .setShopperReference(paymentData.getString("shopperReference"))
@@ -369,7 +423,15 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
         val bcmcComponent : JSONObject = componentData.getJSONObject(PaymentMethodTypes.BCMC)
         val bcmcConfiguration = BcmcConfiguration.Builder(context, bcmcComponent.getString("card_public_key")).build()
 
-        
+        val afterPayComponent : JSONObject = componentData.getJSONObject(PaymentMethodTypes.AFTER_PAY)
+        var afterPayConfiguration : AfterPayConfiguration? = null
+        if(afterPayComponent.length() != 0){
+            afterPayConfiguration =  when (afterPayComponent.getString("countryCode")) {
+                "NL" -> {AfterPayConfiguration.Builder(context, AfterPayConfiguration.CountryCode.NL).build()}
+                "BE" -> {AfterPayConfiguration.Builder(context, AfterPayConfiguration.CountryCode.BE).build()}
+                else -> null
+            }   
+        }
         val resultIntent : Intent = (context.getPackageManager().getLaunchIntentForPackage(context.getApplicationContext().getPackageName())) as Intent
         resultIntent.flags = (Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
         
@@ -381,7 +443,20 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
             .addBcmcConfiguration(bcmcConfiguration)
             .addGooglePayConfiguration(googlePayConfig)
 
-        dropInConfigurationBuilder.setEnvironment(Environment.TEST)
+        if((afterPayComponent.length() != 0) && afterPayConfiguration != null){
+            dropInConfigurationBuilder.addAfterPayConfiguration(afterPayConfiguration)
+        }
+
+        when (configData.environment) {
+            "test" -> {dropInConfigurationBuilder.setEnvironment(Environment.TEST)}
+            "live" -> {dropInConfigurationBuilder.setEnvironment(Environment.EUROPE)}
+            "eu" -> {dropInConfigurationBuilder.setEnvironment(Environment.EUROPE)}
+            "us" -> {dropInConfigurationBuilder.setEnvironment(Environment.UNITED_STATES)}
+            "au" -> {dropInConfigurationBuilder.setEnvironment(Environment.AUSTRALIA)}
+            else -> {
+                dropInConfigurationBuilder.setEnvironment(Environment.TEST)
+            }
+        }
         val shoppersLocale = Locale(paymentData.getString("shopperLocale").toLowerCase().split("_")[0])
         dropInConfigurationBuilder.setShopperLocale(shoppersLocale)
 
@@ -472,34 +547,15 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
                     else -> "ERROR_UNKNOWN"
                 }
                 sendFailure(err_code,detailsResponse.getString("refusalReason"))
-                /*evtObj.put("code",err_code)
-                evtObj.put("message",detailsResponse.getString("refusalReason"))
-                emitDeviceEvent("onError",ReactNativeUtils.convertJsonToMap(evtObj))*/
             }else if(rsCode == "Cancelled"){
                 sendFailure("ERROR_CANCELLED","Transaction Cancelled")
-                /*val evtObj : JSONObject = JSONObject()
-                evtObj.put("code","ERROR_CANCELLED")
-                evtObj.put("message","Transaction Cancelled")
-                emitDeviceEvent("onError",ReactNativeUtils.convertJsonToMap(evtObj))*/
             }else{
                 sendFailure("ERROR_UNKNOWN","Unknown Error")
-                /*val evtObj : JSONObject = JSONObject()
-                evtObj.put("code","ERROR_UNKNOWN")
-                evtObj.put("message","Unknown Error")
-                emitDeviceEvent("onError",ReactNativeUtils.convertJsonToMap(evtObj))*/
             }
         }else if (resultType=="ERROR"){
             sendFailure(response.get("code").toString(),response.get("message").toString())
-            /*val evtObj : JSONObject = JSONObject()
-            evtObj.put("code",response.get("code").toString())
-            evtObj.put("message",response.get("message").toString())
-            emitDeviceEvent("onError",ReactNativeUtils.convertJsonToMap(evtObj))*/
         }else{
             sendFailure("ERROR_UNKNOWN","Unknown Error")
-            /*val evtObj : JSONObject = JSONObject()
-            evtObj.put("code","ERROR_UNKNOWN")
-            evtObj.put("message","Unknown Error")
-            emitDeviceEvent("onError",ReactNativeUtils.convertJsonToMap(evtObj))*/
         }
     }
 
@@ -508,10 +564,6 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
         if (requestCode == DropIn.DROP_IN_REQUEST_CODE && resultCode == Activity.RESULT_CANCELED) {
             sendFailure("ERROR_CANCELLED","Dropin Cancelled")
             Log.d(TAG, "DropIn CANCELED")
-            /*val evtObj : JSONObject = JSONObject()
-            evtObj.put("code","ERROR_CANCELLED")
-            evtObj.put("message","Dropin Cancelled")
-            emitDeviceEvent("onError",ReactNativeUtils.convertJsonToMap(evtObj))*/
         }
     }
 
