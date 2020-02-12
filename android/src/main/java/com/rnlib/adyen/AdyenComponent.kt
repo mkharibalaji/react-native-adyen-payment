@@ -67,6 +67,7 @@ class AdyenComponent private constructor() {
             }
 
             val intent = AdyenComponentActivity.createIntent(context, adyenComponentConfiguration, paymentMethodsApiResponse)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
         }
 
