@@ -359,7 +359,13 @@ class AdyenPayment: RCTEventEmitter {
                 }else if(response.validationError != nil){
                     currentComponent?.stopLoading(withSuccess: false) { [weak self] in
                         let validationError = response.validationError!
-                        self?.presentAlert(withTitle:"Error",message: validationError.errorMessage)
+                        if(validationError.type=="validation"){
+                            self?.presentAlert(withTitle:"Error",message:validationError.errorMessage)
+                        }else{
+                            let errMsg = (validationError.errorCode ?? "") + " : " + (validationError.errorMessage ?? "")
+                                self?.sendFailure(code : "ERROR_PAYMENT_DETAILS",message: errMsg)
+                            (UIApplication.shared.delegate?.window??.rootViewController)!.dismiss(animated: true) {}
+                        }   
                     }
                 }
             }

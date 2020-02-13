@@ -86,9 +86,11 @@ internal struct PaymentsResponse: Response {
     internal var validationError : ValidationError?
 
     internal struct ValidationError : Error {
+        let type : String?
         let errorCode: String?
         let errorMessage: String?
-        init(errorCode: String?=nil, errorMessage: String?=nil) {
+        init(type: String?=nil,errorCode: String?=nil, errorMessage: String?=nil) {
+            self.type = type
             self.errorCode = errorCode
             self.errorMessage = errorMessage
         }
@@ -107,8 +109,8 @@ internal struct PaymentsResponse: Response {
         self.errorCode = try container.decodeIfPresent(String.self, forKey: .errorCode)
         self.errorMessage = try container.decodeIfPresent(String.self, forKey: .errorMessage)
         self.error_code = self.decode_error_code(self.refusalReasonCode)
-        if(self.type != nil && self.type == "validation"){
-            self.validationError = ValidationError(errorCode:self.errorCode,errorMessage:self.errorMessage)
+        if(self.type != nil){
+            self.validationError = ValidationError(type:self.type,errorCode:self.errorCode,errorMessage:self.errorMessage)
         }
     }
     
