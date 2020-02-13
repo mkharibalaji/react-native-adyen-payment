@@ -423,7 +423,7 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
         val bcmcComponent : JSONObject = componentData.getJSONObject(PaymentMethodTypes.BCMC)
         val bcmcConfiguration = BcmcConfiguration.Builder(context, bcmcComponent.getString("card_public_key")).build()
 
-        val afterPayComponent : JSONObject = componentData.getJSONObject(PaymentMethodTypes.AFTER_PAY)
+        val afterPayComponent : JSONObject = if(componentData.has(PaymentMethodTypes.AFTER_PAY))  componentData.getJSONObject(PaymentMethodTypes.AFTER_PAY) else JSONObject()
         var afterPayConfiguration : AfterPayConfiguration? = null
         if(afterPayComponent.length() != 0){
             afterPayConfiguration =  when (afterPayComponent.getString("countryCode")) {
@@ -476,11 +476,13 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
 
     override fun onNewIntent(intent: Intent?) {
         Log.d(TAG, "onNewIntent")
-        if (intent?.hasExtra(DropIn.RESULT_KEY) == true) {
-            Log.d(TAG,intent.getStringExtra(DropIn.RESULT_KEY))
+        if (intent?.hasExtra(AdyenComponent.RESULT_KEY) == true) {
+            Log.d(TAG,intent.getStringExtra(AdyenComponent.RESULT_KEY))
             //Toast.makeText(getReactApplicationContext(), intent.getStringExtra(DropIn.RESULT_KEY), Toast.LENGTH_SHORT).show()
-            val response : JSONObject = JSONObject(intent.getStringExtra(DropIn.RESULT_KEY))
+            val response : JSONObject = JSONObject(intent.getStringExtra(AdyenComponent.RESULT_KEY))
             sendResponse(response)
+        }else if(intent?.hasExtra(AdyenComponent.RESULT_CANCEL_KEY) == true){
+            sendFailure("ERROR_CANCELLED","Transaction Cancelled")
         }
     }
 

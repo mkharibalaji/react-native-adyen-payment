@@ -39,6 +39,9 @@ class AdyenComponent private constructor() {
 
         const val RESULT_KEY = "payment_result"
 
+        const val RESULT_CANCEL_KEY = "payment_cancel"
+
+
         @JvmStatic
         @Deprecated("You can use `DropIn.startPayment instead`")
         val INSTANCE: AdyenComponent by lazy { AdyenComponent() }

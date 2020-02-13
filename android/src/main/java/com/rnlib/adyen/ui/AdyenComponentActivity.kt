@@ -259,6 +259,9 @@ class AdyenComponentActivity : AppCompatActivity(), DropInBottomSheetDialogFragm
 
     override fun terminateDropIn() {
         Logger.d(TAG, "terminateDropIn")
+        adyenComponentConfiguration.resultHandlerIntent.putExtra(AdyenComponent.RESULT_CANCEL_KEY, "Cancelled").let { intent ->
+            startActivity(intent)
+        }
         setResult(Activity.RESULT_CANCELED)
         finish()
         overridePendingTransition(0, R.anim.fade_out)
@@ -302,10 +305,16 @@ class AdyenComponentActivity : AppCompatActivity(), DropInBottomSheetDialogFragm
         }
     }
 
+    private fun closeComponent(){
+        setResult(Activity.RESULT_CANCELED)
+        finish()
+        overridePendingTransition(0, R.anim.fade_out)
+    }
+
     private fun sendResult(content: String) {
         adyenComponentConfiguration.resultHandlerIntent.putExtra(AdyenComponent.RESULT_KEY, content).let { intent ->
             startActivity(intent)
-            terminateDropIn()
+            closeComponent()
         }
     }
 

@@ -12,7 +12,7 @@ import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.ResponseBody
-import org.json.JSONObject
+import org.json.*
 import retrofit2.Call
 import java.io.IOException
 import android.util.Log
@@ -98,6 +98,21 @@ class AdyenComponentService : ComponentService() {
         return handleResponse(call)
     }
 
+    private fun isJSONValid(test:String) : Boolean {
+        try {
+             JSONObject(test)
+        } catch (ex:JSONException) {
+            // edited, to include @Arthur's comment
+            // e.g. in case JSONArray is valid as well...
+            try {
+                JSONArray(test)
+            } catch (ex1:JSONException) {
+                return false
+            }
+        }
+        return true;
+    }
+
     @Suppress("NestedBlockDepth")
     private fun handleResponse(call: Call<ResponseBody>): CallResult {
         return try {
@@ -106,42 +121,70 @@ class AdyenComponentService : ComponentService() {
             val byteArray = response.errorBody()?.bytes()
             if (byteArray != null) {
                 Logger.e(TAG, "errorBody - ${String(byteArray)}")
-            }
-
-            val detailsResponse = JSONObject(response.body()?.string())
-
-            if (response.isSuccessful) {
-                if (detailsResponse.has("action")) {
-                    CallResult(CallResult.ResultType.ACTION, detailsResponse.get("action").toString())
-                } else {
-                    Logger.d(TAG, "Final result - ${JsonUtils.indent(detailsResponse)}")
-                    val successObj : JSONObject = JSONObject()
-                    successObj.put("resultType","SUCCESS")
-                    successObj.put("message",detailsResponse)
-                    CallResult(CallResult.ResultType.FINISHED, successObj.toString())
-                    /*
-                    var resultCode = ""
-                    if (detailsResponse.has("resultCode")) {
-                        resultCode = detailsResponse.get("resultCode").toString()
-                        if(resultCode == "Authorised" || resultCode == "Received" || resultCode == "PENDING"){
-                            CallResult(CallResult.ResultType.FINISHED, detailsResponse.toString())
-                        }else if(resultCode == "Refused" || resultCode == "Cancelled" || resultCode == "Error"){
-                            CallResult(CallResult.ResultType.ERROR, "Transaction Refused/Cancelled/Error")
-                        }else{
-                            CallResult(CallResult.ResultType.ERROR, detailsResponse.toString())
-                        }
+                if(isJSONValid(String(byteArray))){
+                    // Ex : {"type":"configuration","errorCode":"905","errorMessage":"Payment details are not supported"}
+                    val detailsErrResponse = JSONObject(String(byteArray))
+                    if(detailsErrResponse.has("errorCode") && detailsErrResponse.has("errorMessage")){
+                        val errCode = detailsErrResponse.getString("errorCode") 
+                        val errMessage = detailsErrResponse.getString("errorMessage")
+                        val appendedErrMsg = errCode + " : " + errMessage
+                        val errObj : JSONObject = JSONObject()
+                        errObj.put("resultType","ERROR")
+                        errObj.put("code","ERROR_PAYMENT_DETAILS")
+                        errObj.put("message",appendedErrMsg)
+                        CallResult(CallResult.ResultType.FINISHED, errObj.toString())
                     }else{
-                        CallResult(CallResult.ResultType.FINISHED, detailsResponse.toString())
-                    }*/
+                        val errObj : JSONObject = JSONObject()
+                        errObj.put("resultType","ERROR")
+                        errObj.put("code","ERROR_GENERAL")
+                        errObj.put("message",String(byteArray))
+                        CallResult(CallResult.ResultType.FINISHED, errObj.toString())
+                    }
+                }else{
+                        val errObj : JSONObject = JSONObject()
+                        errObj.put("resultType","ERROR")
+                        errObj.put("code","ERROR_GENERAL")
+                        errObj.put("message",String(byteArray))
+                        CallResult(CallResult.ResultType.FINISHED, errObj.toString())
                 }
-            } else {
-                Logger.e(TAG, "FAILED - ${response.message()}")
-                //CallResult(CallResult.ResultType.ERROR, response.message().toString())
-                val errObj : JSONObject = JSONObject()
-                errObj.put("resultType","ERROR")
-                errObj.put("code","ERROR_GENERAL")
-                errObj.put("message",response.message().toString())
-                CallResult(CallResult.ResultType.FINISHED, errObj.toString())
+                
+            }else{
+
+                val detailsResponse = JSONObject(response.body()?.string())
+
+                if (response.isSuccessful) {
+                    if (detailsResponse.has("action")) {
+                        CallResult(CallResult.ResultType.ACTION, detailsResponse.get("action").toString())
+                    } else {
+                        Logger.d(TAG, "Final result - ${JsonUtils.indent(detailsResponse)}")
+                        val successObj : JSONObject = JSONObject()
+                        successObj.put("resultType","SUCCESS")
+                        successObj.put("message",detailsResponse)
+                        CallResult(CallResult.ResultType.FINISHED, successObj.toString())
+                        /*
+                        var resultCode = ""
+                        if (detailsResponse.has("resultCode")) {
+                            resultCode = detailsResponse.get("resultCode").toString()
+                            if(resultCode == "Authorised" || resultCode == "Received" || resultCode == "PENDING"){
+                                CallResult(CallResult.ResultType.FINISHED, detailsResponse.toString())
+                            }else if(resultCode == "Refused" || resultCode == "Cancelled" || resultCode == "Error"){
+                                CallResult(CallResult.ResultType.ERROR, "Transaction Refused/Cancelled/Error")
+                            }else{
+                                CallResult(CallResult.ResultType.ERROR, detailsResponse.toString())
+                            }
+                        }else{
+                            CallResult(CallResult.ResultType.FINISHED, detailsResponse.toString())
+                        }*/
+                    }
+                } else {
+                    Logger.e(TAG, "FAILED - ${response.message()}")
+                    //CallResult(CallResult.ResultType.ERROR, response.message().toString())
+                    val errObj : JSONObject = JSONObject()
+                    errObj.put("resultType","ERROR")
+                    errObj.put("code","ERROR_GENERAL")
+                    errObj.put("message",response.message().toString())
+                    CallResult(CallResult.ResultType.FINISHED, errObj.toString())
+                }
             }
         } catch (e: IOException) {
             Logger.e(TAG, "IOException", e)
