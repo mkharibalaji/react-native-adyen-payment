@@ -556,6 +556,8 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
             }
         }else if (resultType=="ERROR"){
             sendFailure(response.get("code").toString(),response.get("message").toString())
+        }else if(resultType=="ERROR_VALIDATION"){
+            Toast.makeText(getReactApplicationContext(), response.get("message").toString(), Toast.LENGTH_SHORT).show()
         }else{
             sendFailure("ERROR_UNKNOWN","Unknown Error")
         }

@@ -125,11 +125,13 @@ class AdyenComponentService : ComponentService() {
                     // Ex : {"type":"configuration","errorCode":"905","errorMessage":"Payment details are not supported"}
                     val detailsErrResponse = JSONObject(String(byteArray))
                     if(detailsErrResponse.has("errorCode") && detailsErrResponse.has("errorMessage")){
+                        val errType = detailsErrResponse.getString("type")
                         val errCode = detailsErrResponse.getString("errorCode") 
                         val errMessage = detailsErrResponse.getString("errorMessage")
-                        val appendedErrMsg = errCode + " : " + errMessage
+                        val appendedErrMsg = if(errType=="validation") errMessage else (errCode + " : " + errMessage)
+                        val resultType = if(errType=="validation") "ERROR_VALIDATION" else "ERROR"
                         val errObj : JSONObject = JSONObject()
-                        errObj.put("resultType","ERROR")
+                        errObj.put("resultType",resultType)
                         errObj.put("code","ERROR_PAYMENT_DETAILS")
                         errObj.put("message",appendedErrMsg)
                         CallResult(CallResult.ResultType.FINISHED, errObj.toString())
