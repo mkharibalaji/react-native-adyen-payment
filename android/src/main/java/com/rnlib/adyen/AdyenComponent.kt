@@ -41,6 +41,8 @@ class AdyenComponent private constructor() {
 
         const val RESULT_CANCEL_KEY = "payment_cancel"
 
+        const val DROP_IN_PREFS = "drop-in-shared-prefs"
+        const val LOCALE_PREF = "drop-in-locale"
 
         @JvmStatic
         @Deprecated("You can use `DropIn.startPayment instead`")
@@ -62,12 +64,17 @@ class AdyenComponent private constructor() {
             adyenComponentConfiguration: AdyenComponentConfiguration
         ) {
 
-            for (each in paymentMethodsApiResponse.paymentMethods!!) {
+            /*for (each in paymentMethodsApiResponse.paymentMethods!!) {
                 if (each.type == PaymentMethodTypes.SCHEME) {
                     this.handleSupportedCards(adyenComponentConfiguration, each, context)
                     break
                 }
-            }
+            }*/
+            Logger.d(TAG,"AdyenComponentLocale : "+adyenComponentConfiguration.shopperLocale.toString())
+            context.getSharedPreferences(DROP_IN_PREFS, Context.MODE_PRIVATE).edit()
+                    .putString(LOCALE_PREF, adyenComponentConfiguration.shopperLocale.toString())
+                    .apply()
+
 
             val intent = AdyenComponentActivity.createIntent(context, adyenComponentConfiguration, paymentMethodsApiResponse)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -81,7 +88,7 @@ class AdyenComponent private constructor() {
         /**
          * Try to get supported cards from API response when [CardConfiguration] supported cards are default ones.
          */
-        @Suppress("SpreadOperator")
+       /* @Suppress("SpreadOperator")
         private fun handleSupportedCards(adyenComponentConfiguration: AdyenComponentConfiguration, schemePaymentMethod: PaymentMethod, context: Context) {
 
             var cardConfiguration = adyenComponentConfiguration.getConfigurationFor<CardConfiguration>(PaymentMethodTypes.SCHEME, context)
@@ -98,6 +105,6 @@ class AdyenComponent private constructor() {
                     adyenComponentConfiguration.availableConfigs[PaymentMethodTypes.SCHEME] = newCardConfiguration
                 }
             }
-        }
+        }*/
     }
 }

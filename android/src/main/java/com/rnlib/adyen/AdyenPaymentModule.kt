@@ -260,8 +260,10 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
             }
         }
         //adyenConfigurationBuilder.setEnvironment(Environment.TEST)
-        val shoppersLocale = Locale(paymentData.getString("shopperLocale").toLowerCase().split("_")[0])
-        adyenConfigurationBuilder.setShopperLocale(shoppersLocale)
+        val localeArr = paymentData.getString("shopperLocale").split("_")
+        val shopperLocale = Locale(localeArr[0],localeArr[1])
+        //val shoppersLocale = Locale(paymentData.getString("shopperLocale").toLowerCase().split("_")[0])
+        adyenConfigurationBuilder.setShopperLocale(shopperLocale)
         try {
             adyenConfigurationBuilder.setAmount(getAmt(paymentData.getJSONObject("amount")))
         } catch (e: CheckoutException) {
@@ -401,6 +403,8 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
 
         Log.d(TAG, "startDropIn")
         val context = getReactApplicationContext()
+        val localeArr = paymentData.getString("shopperLocale").split("_")
+        val shopperLocale = Locale(localeArr[0],localeArr[1])
 
         val googlePayConfigBuilder = GooglePayConfiguration.Builder(context,paymentData.getString("merchantAccount"))
         when (configData.environment) {
@@ -419,19 +423,33 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
         val cardComponent : JSONObject = componentData.getJSONObject(PaymentMethodTypes.SCHEME)
         val cardConfiguration = CardConfiguration.Builder(context, cardComponent.getString("card_public_key"))
                             .setShopperReference(paymentData.getString("shopperReference"))
+                            .setShopperLocale(shopperLocale)
                             .build()
         val bcmcComponent : JSONObject = componentData.getJSONObject(PaymentMethodTypes.BCMC)
-        val bcmcConfiguration = BcmcConfiguration.Builder(context, bcmcComponent.getString("card_public_key")).build()
+        val bcmcConfiguration = BcmcConfiguration.Builder(context, bcmcComponent.getString("card_public_key"))
+                                .setShopperLocale(shopperLocale).build()
 
         val afterPayComponent : JSONObject = if(componentData.has(PaymentMethodTypes.AFTER_PAY))  componentData.getJSONObject(PaymentMethodTypes.AFTER_PAY) else JSONObject()
         var afterPayConfiguration : AfterPayConfiguration? = null
         if(afterPayComponent.length() != 0){
             afterPayConfiguration =  when (afterPayComponent.getString("countryCode")) {
-                "NL" -> {AfterPayConfiguration.Builder(context, AfterPayConfiguration.CountryCode.NL).build()}
-                "BE" -> {AfterPayConfiguration.Builder(context, AfterPayConfiguration.CountryCode.BE).build()}
+                "NL" -> {AfterPayConfiguration.Builder(context, AfterPayConfiguration.CountryCode.NL).setShopperLocale(shopperLocale).build()}
+                "BE" -> {AfterPayConfiguration.Builder(context, AfterPayConfiguration.CountryCode.BE).setShopperLocale(shopperLocale).build()}
                 else -> null
             }   
+            
         }
+
+        val configBuilder : AdyenComponentConfiguration.Builder = createConfigurationBuilder(context)
+        configBuilder.addCardConfiguration(cardConfiguration)
+            .addBcmcConfiguration(bcmcConfiguration)
+            .addGooglePayConfiguration(googlePayConfig)
+
+        if((afterPayComponent.length() != 0) && afterPayConfiguration != null){
+            configBuilder.addAfterPayConfiguration(afterPayConfiguration)
+        }
+        AdyenComponent.startPayment(context, paymentMethodsApiResponse, configBuilder.build())
+        /*
         val resultIntent : Intent = (context.getPackageManager().getLaunchIntentForPackage(context.getApplicationContext().getPackageName())) as Intent
         resultIntent.flags = (Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
         
@@ -457,8 +475,8 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
                 dropInConfigurationBuilder.setEnvironment(Environment.TEST)
             }
         }
-        val shoppersLocale = Locale(paymentData.getString("shopperLocale").toLowerCase().split("_")[0])
-        dropInConfigurationBuilder.setShopperLocale(shoppersLocale)
+        
+        dropInConfigurationBuilder.setShopperLocale(shopperLocale)
 
         val amount = Amount()
         val amtJson : JSONObject  = paymentData.getJSONObject("amount")
@@ -472,6 +490,7 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
         }
         
         DropIn.startPayment(context, paymentMethodsApiResponse, dropInConfigurationBuilder.build())
+        */
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -566,7 +585,7 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
     private fun parseActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         Log.d(TAG, "parseActivityResult")
         if (requestCode == DropIn.DROP_IN_REQUEST_CODE && resultCode == Activity.RESULT_CANCELED) {
-            sendFailure("ERROR_CANCELLED","Dropin Cancelled")
+            sendFailure("ERROR_CANCELLED","Transaction Cancelled")
             Log.d(TAG, "DropIn CANCELED")
         }
     }
