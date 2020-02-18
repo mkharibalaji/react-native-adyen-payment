@@ -517,10 +517,11 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
             val rsCode : String = detailsResponse.getString("resultCode")
             if(rsCode == "Authorised" || rsCode == "Received" || rsCode == "Pending"){
                 val message : JSONObject = JSONObject()
+                val addt_data_obj : JSONObject = if(detailsResponse.has("additionalData"))  detailsResponse.getJSONObject("additionalData") else JSONObject()
                 message.put("resultCode", detailsResponse.getString("resultCode"))
                 message.put("merchantReference", detailsResponse.getString("merchantReference"))
                 message.put("pspReference", detailsResponse.getString("pspReference"))
-                message.put("additionalData", detailsResponse.getJSONObject("additionalData"))
+                message.put("additionalData", addt_data_obj)
 
                 sendSuccess(message)
 
