@@ -1,3 +1,7 @@
+![npm](https://img.shields.io/npm/dw/react-native-adyen-payment.svg)
+[![npm (tag)](https://img.shields.io/npm/v/react-native-adyen-payment/latest.svg)](https://github.com/mkharibalaji/react-native-adyen-payment/tree/master)
+
+
 # react-native-adyen-payment
 
 <h1 align="center" style="vertical-align:middle;">
