@@ -112,10 +112,10 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
 
     override fun getName() = REACT_CLASS
 
-    fun getAmt(amtJson : JSONObject?) : Amount {
+    fun getAmt(amtJson : JSONObject) : Amount {
         val amount = Amount()
-        amount.currency = amtJson?.getString("currency") as String
-        amount.value = amtJson?.getInt("value") as Int
+        amount.currency = amtJson.getString("currency") as String
+        amount.value = amtJson.getInt("value")
         return amount;
     }
 
@@ -189,16 +189,16 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
                 if (response.isSuccessful()) {
                     // tasks available
                     val pmApiResponse : PaymentMethodsApiResponse = PaymentMethodsApiResponse.SERIALIZER.deserialize(JSONObject(response.body()?.string()))
-                    val paymentMethods : MutableList<PaymentMethod> = mutableListOf<PaymentMethod>()
+                    val paymentMethodsList : MutableList<PaymentMethod> = mutableListOf<PaymentMethod>()
                     if(component != "dropin"){
                         for (each in pmApiResponse.paymentMethods!!) {
                             Log.i(TAG,each.toString())
                             if (each.type == component) {
-                                paymentMethods.add(each)
+                                paymentMethodsList.add(each)
                                 break
                             }
                         }
-                        pmApiResponse.setPaymentMethods(paymentMethods)
+                        pmApiResponse.setPaymentMethods(paymentMethodsList)
                         paymentMethodsApiResponse = pmApiResponse
                         when(component){
                             PaymentMethodTypes.GOOGLE_PAY -> showGooglePayComponent(compData)
@@ -237,7 +237,7 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
                 // something went completely south (like no internet connection)
                 setLoading(false)
                 sendFailure("ERROR_GENERAL",t!!.message.toString())
-                Log.d("Error", t!!.message)
+                Log.d("Error", t.message)
             }
         })
     }
@@ -272,6 +272,7 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
         return adyenConfigurationBuilder
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun showWeChatPayComponent(component : String,componentData : JSONObject){
         val context = getReactApplicationContext()
         val wechatPayConfiguration = WeChatPayConfiguration.Builder(context).build()
@@ -282,6 +283,7 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
         AdyenComponent.startPayment(context, paymentMethodsApiResponse, configBuilder.build())
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun showIdealComponent(componentData : JSONObject){
         val context = getReactApplicationContext()
         val idealConfiguration = IdealConfiguration.Builder(context).build()
@@ -290,6 +292,7 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
         AdyenComponent.startPayment(context, paymentMethodsApiResponse, configBuilder.build())
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun showMOLPayComponent(component : String,componentData : JSONObject){
         val context = getReactApplicationContext()
         val molPayConfiguration = MolpayConfiguration.Builder(context).build()
@@ -302,6 +305,7 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
         AdyenComponent.startPayment(context, paymentMethodsApiResponse, configBuilder.build())
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun showDotPayComponent(componentData : JSONObject){
         val context = getReactApplicationContext()
         val dotPayConfiguration = DotpayConfiguration.Builder(context).build()
@@ -310,6 +314,7 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
         AdyenComponent.startPayment(context, paymentMethodsApiResponse, configBuilder.build())
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun showEPSComponent(componentData : JSONObject){
         val context = getReactApplicationContext()
         val epsConfiguration = EPSConfiguration.Builder(context).build()
@@ -318,6 +323,7 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
         AdyenComponent.startPayment(context, paymentMethodsApiResponse, configBuilder.build())
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun showEnterCashComponent(componentData : JSONObject){
         val context = getReactApplicationContext()
         val enterCashConfiguration = EntercashConfiguration.Builder(context).build()
@@ -326,6 +332,7 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
         AdyenComponent.startPayment(context, paymentMethodsApiResponse, configBuilder.build())
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun showOpenBankingComponent(componentData : JSONObject){
         val context = getReactApplicationContext()
         val openBankingConfiguration = OpenBankingConfiguration.Builder(context).build()
@@ -334,6 +341,7 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
         AdyenComponent.startPayment(context, paymentMethodsApiResponse, configBuilder.build())
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun showSEPAComponent(componentData : JSONObject){
         val context = getReactApplicationContext()
         val sepaConfiguration = SepaConfiguration.Builder(context).build()
@@ -342,6 +350,7 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
         AdyenComponent.startPayment(context, paymentMethodsApiResponse, configBuilder.build())
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun showBCMCComponent(componentData : JSONObject){
         val context = getReactApplicationContext()
         val bcmcComponent : JSONObject = componentData.getJSONObject(PaymentMethodTypes.BCMC)
@@ -351,6 +360,7 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
         AdyenComponent.startPayment(context, paymentMethodsApiResponse, configBuilder.build())
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun showCardComponent(componentData : JSONObject){
         val context = getReactApplicationContext()
         val cardComponent : JSONObject = componentData.getJSONObject(PaymentMethodTypes.SCHEME)
@@ -362,6 +372,7 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
         AdyenComponent.startPayment(context, paymentMethodsApiResponse, configBuilder.build())
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun showGooglePayComponent(componentData : JSONObject){
         val context = getReactApplicationContext()
         val googlePayConfigBuilder = GooglePayConfiguration.Builder(context,paymentData.getString("merchantAccount"))
@@ -524,12 +535,7 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
                 message.put("additionalData", addt_data_obj)
 
                 sendSuccess(message)
-
-                /*val evtObj : JSONObject = JSONObject()
-                evtObj.put("message",message)
-                emitDeviceEvent("onSuccess",ReactNativeUtils.convertJsonToMap(evtObj))*/
             }else if(rsCode == "Refused" || rsCode == "Error"){
-                val evtObj : JSONObject = JSONObject()
                 val err_refusal_code = detailsResponse.getString("refusalReasonCode")
                 val err_code = when(err_refusal_code) {
                     "0" -> "ERROR_GENERAL"
@@ -583,6 +589,7 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
         }
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun parseActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         Log.d(TAG, "parseActivityResult")
         if (requestCode == DropIn.DROP_IN_REQUEST_CODE && resultCode == Activity.RESULT_CANCELED) {
