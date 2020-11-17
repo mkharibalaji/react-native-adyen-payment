@@ -269,6 +269,8 @@ class AdyenPayment: RCTEventEmitter {
         let cardComponent : [String:Any] = componentData["scheme"] as? [String:Any] ?? [:]
         if(!cardComponent.isEmpty){
             configuration.card.publicKey = cardComponent["card_public_key"] as? String
+            configuration.card.showsHolderNameField = cardComponent["showsHolderNameField"] as? Bool
+            configuration.card.showsStorePaymentMethodField = cardComponent["showsStorePaymentMethodField"] as? Bool
         }
         let bcmcComponent : [String:Any] = componentData["bcmc"] as? [String:Any] ?? [:]
         if(!bcmcComponent.isEmpty){
