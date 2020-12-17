@@ -40,7 +40,7 @@ import java.util.Locale
 @SuppressWarnings("TooManyFunctions")
 class AdyenComponentConfiguration : Configuration, Parcelable {
 
-    val availableConfigs: HashMap<String, Configuration>
+    val availableConfigs: Map<String, Configuration>
     val serviceComponentName: ComponentName
     val resultHandlerIntent: Intent
     val amount: Amount
@@ -56,7 +56,7 @@ class AdyenComponentConfiguration : Configuration, Parcelable {
     constructor(
         shopperLocale: Locale,
         environment: Environment,
-        availableConfigs: HashMap<String, Configuration>,
+        availableConfigs: Map<String, Configuration>,
         serviceComponentName: ComponentName,
         resultHandlerIntent: Intent,
         amount: Amount
@@ -69,7 +69,7 @@ class AdyenComponentConfiguration : Configuration, Parcelable {
 
     constructor(parcel: Parcel) : super(parcel) {
         @Suppress("UNCHECKED_CAST")
-        availableConfigs = parcel.readHashMap(Configuration::class.java.classLoader) as HashMap<String, Configuration>
+        availableConfigs = parcel.readHashMap(Configuration::class.java.classLoader) as Map<String, Configuration>
         serviceComponentName = parcel.readParcelable(ComponentName::class.java.classLoader)!!
         resultHandlerIntent = parcel.readParcelable(Intent::class.java.classLoader)!!
         amount = Amount.CREATOR.createFromParcel(parcel)
