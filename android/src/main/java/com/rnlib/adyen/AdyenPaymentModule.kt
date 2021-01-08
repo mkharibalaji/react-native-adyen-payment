@@ -439,10 +439,13 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
                             .setShowStorePaymentField(cardComponent.optBoolean("showStorePaymentField"))
                             .build()
 
-        val bcmcComponent : JSONObject = componentData.getJSONObject(PaymentMethodTypes.BCMC)
-        val bcmcConfiguration = BcmcConfiguration.Builder(context, bcmcComponent.getString("card_public_key"))
+        val bcmcComponent : JSONObject = if(componentData.has(PaymentMethodTypes.BCMC))  componentData.getJSONObject(PaymentMethodTypes.BCMC) else JSONObject()
+        var bcmcConfiguration : BcmcConfiguration? = null
+        if(bcmcComponent.length() != 0){
+          bcmcConfiguration = BcmcConfiguration.Builder(context, bcmcComponent.getString("card_public_key"))
                                 .setShopperLocale(shopperLocale)
                                 .build()
+        }
 
         val afterPayComponent : JSONObject = if(componentData.has(PaymentMethodTypes.AFTER_PAY))  componentData.getJSONObject(PaymentMethodTypes.AFTER_PAY) else JSONObject()
         var afterPayConfiguration : AfterPayConfiguration? = null
@@ -474,8 +477,11 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
             resultIntent,
             AdyenDropInService::class.java
         ).addCardConfiguration(cardConfiguration)
-            .addBcmcConfiguration(bcmcConfiguration)
             .addGooglePayConfiguration(googlePayConfig)
+
+        if((bcmcComponent.length() != 0) && bcmcConfiguration != null){
+          dropInConfigurationBuilder.addBcmcConfiguration(bcmcConfiguration)
+        }
 
         if((afterPayComponent.length() != 0) && afterPayConfiguration != null){
             dropInConfigurationBuilder.addAfterPayConfiguration(afterPayConfiguration)
