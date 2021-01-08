@@ -44,10 +44,10 @@ const MOCK_COMPONENT_DATA = {
 const APP_SERVICE_CONFIG_DATA = {
   environment: ADYEN_ENVIRONMENT,
   base_url: ADYEN_BASE_URL,
-  // Uncomment to add any additional headers to pass to your backend
-  // additional_http_headers: {
-  //   'x-channel': 'ios',
-  // },
+  // Add any additional headers to pass to your backend
+  additional_http_headers: {
+    'x-channel': Platform.OS, // Example
+  },
 };
 
 const STATUS = {
