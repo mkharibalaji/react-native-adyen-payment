@@ -16,7 +16,7 @@ const MOCK_PAYMENT_DETAILS = {
   reference: '123456',
   shopperReference: '123456',
   shopperEmail: 'test@test.test',
-  shopperLocale: 'en-US',
+  shopperLocale: 'en_US',
   channel: Platform.OS === 'ios' ? 'iOS' : 'Android',
   countryCode: 'US',
   // Remember to replace returnUrl with your app scheme
