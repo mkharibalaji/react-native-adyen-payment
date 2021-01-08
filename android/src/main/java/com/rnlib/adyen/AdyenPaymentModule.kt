@@ -597,7 +597,7 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
     @Suppress("UNUSED_PARAMETER")
     private fun parseActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         Log.d(TAG, "parseActivityResult")
-        if (requestCode == DropIn.DROP_IN_REQUEST_CODE && resultCode == Activity.RESULT_CANCELED) {
+        if (requestCode == DropIn.DROP_IN_REQUEST_CODE && resultCode == Activity.RESULT_CANCELED && data != null) {
             sendFailure("ERROR_CANCELLED","Transaction Cancelled")
             Log.d(TAG, "DropIn CANCELED")
         }
