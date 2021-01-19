@@ -41,7 +41,7 @@ internal final class APIClient {
         
         requestCounter += 1
         
-        urlSession.dataTask(with: urlRequest) { result in
+        urlSession.adyen.dataTask(with: urlRequest) { result in
             switch result {
             case let .success(data):
                 print(" ---- Response (/\(request.path)) ----")

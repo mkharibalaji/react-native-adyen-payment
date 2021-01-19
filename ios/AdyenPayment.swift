@@ -390,6 +390,8 @@ class AdyenPayment: RCTEventEmitter {
             performThreeDS2Fingerprint(with: threeDS2FingerprintAction)
         case let .threeDS2Challenge(threeDS2ChallengeAction):
             performThreeDS2Challenge(with: threeDS2ChallengeAction)
+        default:
+            break
         }
     }
     
