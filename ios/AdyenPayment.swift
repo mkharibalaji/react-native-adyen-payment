@@ -396,10 +396,10 @@ class AdyenPayment: RCTEventEmitter {
     }
     
     func redirect(with action: RedirectAction) {
-        let redirectComponent = RedirectComponent(action: action)
+        let redirectComponent = RedirectComponent()
         redirectComponent.delegate = self
         self.redirectComponent = redirectComponent
-        UIApplication.shared.keyWindow?.rootViewController?.present(redirectComponent.viewController, animated: true)
+        redirectComponent.handle(action)
     }
     
     func performThreeDS2Fingerprint(with action: ThreeDS2FingerprintAction) {
@@ -428,7 +428,7 @@ class AdyenPayment: RCTEventEmitter {
         }else{
             self.sendFailure(code : "ERROR_UNKNOWN",message: "Unknown Error")
         }
-        currentComponent?.stopLoading(withSuccess: true) { [weak self] in
+        currentComponent?.stopLoading(withSuccess: true) { [] in
             (UIApplication.shared.delegate?.window??.rootViewController)!.dismiss(animated: true) {}
         }
         redirectComponent = nil
@@ -447,8 +447,6 @@ class AdyenPayment: RCTEventEmitter {
         threeDS2Component = nil
         (UIApplication.shared.delegate?.window??.rootViewController)!.dismiss(animated: true) {}
     }
-    
-
     
     private func presentAlert(with error: Error, retryHandler: (() -> Void)? = nil) {
         let alertController = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)

@@ -38,7 +38,7 @@ internal struct PaymentsRequest: Request {
             "value": PaymentsData.amount.value
         ]
         
-        try container.encode(data.paymentMethod.dictionaryRepresentation, forKey: .details)
+        try container.encode(data.paymentMethod.encodable, forKey: .details)
         try container.encode(data.storePaymentMethod, forKey: .storePaymentMethod)
         try container.encode("iOS", forKey: .channel)
         try container.encode(amount, forKey: .amount)
