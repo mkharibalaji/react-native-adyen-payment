@@ -36,3 +36,11 @@ As `react-native-adyen-payment` is a native library - integrating it into your a
 
 # Todo
 Documentation needs to be updated - If someone could help on this part,it would be great !!!
+
+# Contributors
+Contributors are always Welcome
+<a href="https://github.com/mkharibalaji/react-native-adyen-payment/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=mkharibalaji/react-native-adyen-payment" />
+</a>
+
+Made with :heart: React Native
