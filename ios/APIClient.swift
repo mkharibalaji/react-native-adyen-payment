@@ -56,8 +56,14 @@ internal final class APIClient {
                     completionHandler(.failure(error))
                 }
             case let .failure(error):
-                print("API Failure error: \(error).")
-                completionHandler(.failure(error))
+                let errCode = (error as NSError).code
+                if (errCode == NSURLErrorNetworkConnectionLost && self.retryCounter < 3) {
+                    self.retryCounter += 1
+                    self.perform(request, completionHandler: completionHandler)
+                } else {
+                    print("API Failure error: \(error).")
+                    completionHandler(.failure(error))
+                }
             }
             
             self.requestCounter -= 1
@@ -75,6 +81,7 @@ internal final class APIClient {
         }
     }
     
+    private var retryCounter = 0
 }
 
 private func printAsJSON(_ data: Data) {
