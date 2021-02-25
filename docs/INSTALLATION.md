@@ -140,7 +140,7 @@ import Adyen
   - [random] A random string of hex-encoded bytes to make the hostname unpredictable.
   - [company name] The company name to be included in the URL endpoint. If the name is too long, it is shortened. If the name includes underscores or hyphens, any underscores and/or hyphens are stripped.
 
-  The AdyenPayment system internally calls your API base URL with the following POST endpoints which internally calls the above mentioned URL's
+The AdyenPayment system internally calls your API base URL with the following POST endpoints which internally calls the above mentioned URL's
 
          - /paymentMethods
          - /payments
@@ -162,3 +162,5 @@ import Adyen
           "additional_http_headers" : {
             "x-demo-server-api-key": DEMO_SERVER_API_KEY
           }
+
+:warning: When implementing the `/payments` endpoint, make sure to validate the `amount` server-side. A malicious end user could spoof requests and change the amount being send from the client. :warning:
