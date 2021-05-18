@@ -11,6 +11,7 @@ internal protocol Request: Encodable {
     associatedtype ResponseType: Response
     
     var path: String { get }
+    var method: String { get }
     
 }
 

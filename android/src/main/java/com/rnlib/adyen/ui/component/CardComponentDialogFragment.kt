@@ -6,6 +6,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.SwitchCompat
 import com.adyen.checkout.base.PaymentComponentState
 import com.adyen.checkout.base.model.payments.request.PaymentMethodDetails
 import com.adyen.checkout.base.util.CurrencyUtils
@@ -19,8 +20,7 @@ import com.rnlib.adyen.R
 import com.rnlib.adyen.ui.AdyenComponentViewModel
 import com.rnlib.adyen.ui.base.BaseComponentDialogFragment
 import kotlinx.android.synthetic.main.frag_card_component.adyenCardView
-import kotlinx.android.synthetic.main.view_card_component.view.header
-import kotlinx.android.synthetic.main.view_card_component.view.payButton
+import kotlinx.android.synthetic.main.view_card_component.view.*
 
 class CardComponentDialogFragment : BaseComponentDialogFragment() {
 
@@ -48,7 +48,7 @@ class CardComponentDialogFragment : BaseComponentDialogFragment() {
 
         if (!adyenComponentConfiguration.amount.isEmpty) {
             val value = CurrencyUtils.formatAmount(adyenComponentConfiguration.amount, adyenComponentConfiguration.shopperLocale)
-            adyenCardView.payButton.text = String.format(resources.getString(R.string.pay_button_with_value), value)
+            adyenCardView.payButton.text = resources.getString(R.string.add_card)
         }
 
         component.observe(this, this)
@@ -78,9 +78,25 @@ class CardComponentDialogFragment : BaseComponentDialogFragment() {
         } else {
             adyenCardView.payButton.visibility = View.GONE
         }
+
+        bindAddCardButtonWithAuthorizeSwitch()
     }
 
     override fun onChanged(paymentComponentState: PaymentComponentState<in PaymentMethodDetails>?) {
         //adyenCardView.payButton.isEnabled = paymentComponentState != null && paymentComponentState.isValid()
     }
+
+    private fun bindAddCardButtonWithAuthorizeSwitch() {
+        val switchCompat = adyenCardView
+                .cardView
+                .findViewById<SwitchCompat>(R.id.switch_storePaymentMethod)
+
+        switchCompat.isChecked = true
+
+        adyenCardView.payButton.isEnabled = switchCompat.isChecked
+        switchCompat?.setOnCheckedChangeListener { _, isChecked ->
+            adyenCardView.payButton.isEnabled = isChecked
+        }
+    }
+
 }

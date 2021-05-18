@@ -46,20 +46,20 @@ class AdyenPayment: RCTEventEmitter {
     
     func setPaymentDetails(_ paymentDetails : NSDictionary){
         let amount = paymentDetails["amount"] as! [String : Any]
-        let additionalData = paymentDetails["additionalData"] as? [String : Any]
+//        let additionalData = paymentDetails["additionalData"] as? [String : Any]
         PaymentsData.amount = Payment.Amount(value: amount["value"] as! Int, currencyCode: amount["currency"] as! String)
         PaymentsData.reference = paymentDetails["reference"] as! String
         PaymentsData.countryCode = paymentDetails["countryCode"] as! String
         PaymentsData.returnUrl = paymentDetails["returnUrl"] as! String
-        PaymentsData.shopperReference = paymentDetails["shopperReference"] as! String
-        PaymentsData.shopperEmail = paymentDetails["shopperEmail"] as! String
-        PaymentsData.shopperLocale = paymentDetails["shopperLocale"] as! String
-        PaymentsData.merchantAccount = paymentDetails["merchantAccount"] as! String
-        if(additionalData != nil){
-            let allow3DS2 : Bool = (additionalData?["allow3DS2"] != nil) ? additionalData?["allow3DS2"] as! Bool : false
-            let executeThreeD : Bool = (additionalData?["executeThreeD"] != nil) ? additionalData?["executeThreeD"] as! Bool : false
-            PaymentsData.additionalData = ["allow3DS2":  allow3DS2,"executeThreeD":executeThreeD]
-        }
+//        PaymentsData.shopperReference = paymentDetails["shopperReference"] as! String
+//        PaymentsData.shopperEmail = paymentDetails["shopperEmail"] as! String
+//        PaymentsData.shopperLocale = paymentDetails["shopperLocale"] as! String
+//        PaymentsData.merchantAccount = paymentDetails["merchantAccount"] as! String
+//        if(additionalData != nil){
+//            let allow3DS2 : Bool = (additionalData?["allow3DS2"] != nil) ? additionalData?["allow3DS2"] as! Bool : false
+//            let executeThreeD : Bool = (additionalData?["executeThreeD"] != nil) ? additionalData?["executeThreeD"] as! Bool : false
+//            PaymentsData.additionalData = ["allow3DS2":  allow3DS2,"executeThreeD":executeThreeD]
+//        }
         /*PaymentsData.cardComponent =  (paymentDetails["cardComponent"] != nil) ? paymentDetails["cardComponent"] as! [String : Any] : [String : Any]()*/
     }
     
@@ -97,15 +97,18 @@ class AdyenPayment: RCTEventEmitter {
         guard let paymentMethod = self.paymentMethods?.paymentMethod(ofType: CardPaymentMethod.self) else { return}
         let cardComponent : [String:Any] = componentData["scheme"] as? [String:Any] ?? [:]
         guard cardComponent["card_public_key"] != nil else {return}
+        guard let shouldShowSCAToggle = cardComponent["shouldShowSCAToggle"] else {return}
         DispatchQueue.main.async {
-            if(self.storedPaymentMethod(ofType: StoredCardPaymentMethod.self) != nil){
-                let configuration = DropInComponent.PaymentMethodsConfiguration()
-                configuration.card.publicKey = cardComponent["card_public_key"] as? String
-                self.showDropInComponent(configuration: configuration)
-            }else{
-                let component = CardComponent(paymentMethod: paymentMethod, publicKey:(cardComponent["card_public_key"] as! String))
-                self.present(component)
-            }
+//            if(self.storedPaymentMethod(ofType: StoredCardPaymentMethod.self) != nil){
+//                let configuration = DropInComponent.PaymentMethodsConfiguration()
+//                configuration.card.publicKey = cardComponent["card_public_key"] as? String
+//                self.showDropInComponent(configuration: configuration)
+//            }else{
+            let style = FormComponentStyle(tintColor: UIColor.init(hex: 0xFF5436))
+            let component = CardComponent(paymentMethod: paymentMethod, publicKey:(cardComponent["card_public_key"] as! String), style: style)
+            component.showsStorePaymentMethodField = shouldShowSCAToggle as! Bool
+            self.present(component)
+//            }
         }
     }
     
@@ -341,7 +344,7 @@ class AdyenPayment: RCTEventEmitter {
     }
     
     func performPayment(with data: PaymentComponentData) {
-        let request = PaymentsRequest(data: data)
+        let request = PaymentsRequest(path: PaymentsData.reference, data: data)
         apiClient.perform(request, completionHandler: paymentResponseHandler)
     }
     
@@ -369,6 +372,9 @@ class AdyenPayment: RCTEventEmitter {
                             (UIApplication.shared.delegate?.window??.rootViewController)!.dismiss(animated: true) {}
                         }   
                     }
+                }else if(response.spinError != nil){
+                    self.sendFailure(code : "ERROR_SPIN",message: response.spinError!)
+                    (UIApplication.shared.delegate?.window??.rootViewController)!.dismiss(animated: true) {}
                 }
             }
         case let .failure(error):
@@ -419,7 +425,12 @@ class AdyenPayment: RCTEventEmitter {
         if(resultCode == .authorised || resultCode == .received || resultCode == .pending){
             let additionalData : NSDictionary = (response.additionalData != nil) ? NSMutableDictionary(dictionary:response.additionalData!) : NSDictionary()
             print(response)
-            let msg:Dictionary? = ["resultCode" : resultCode.rawValue,"merchantReference":response.merchantReference!,"pspReference" : response.pspReference!,"additionalData" : additionalData]
+            let spinCardData = (response.spinCardData != nil) ? response.spinCardData as! [[String : Any]] : []
+            let creditCards = spinCardData.map ({
+                (card : [String : Any]) -> NSDictionary in
+                return NSMutableDictionary(dictionary: card)
+            })
+            let msg:Dictionary? = ["resultCode" : resultCode.rawValue,"merchantReference":response.merchantReference,"pspReference" : response.pspReference,"additionalData" : additionalData, "creditCards": creditCards]
             self.sendSuccess(message:msg)
         }else if(resultCode == .refused || resultCode == .error){
             self.sendFailure(code : response.error_code ?? "",message: response.refusalReason ?? "")

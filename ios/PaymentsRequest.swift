@@ -18,52 +18,56 @@ internal struct PaymentsData {
     static var shopperEmail: String = ""
     static var merchantAccount : String = ""
     static var additionalData : [String : Any] = ["allow3DS2": true,"executeThreeD":true]
+    static var regionId : Int = 1
 }
 
 internal struct PaymentsRequest: Request {
     
     internal typealias ResponseType = PaymentsResponse
     
-    internal let path = "payments"
-    
+    internal let path: String
     internal let data: PaymentComponentData
+    internal let method = "POST"
     
     //internal let paymentData : NSDictionary
     
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         
-        let amount: [String: Any] = [
-            "currency": PaymentsData.amount.currencyCode,
-            "value": PaymentsData.amount.value
-        ]
-        
+//        let amount: [String: Any] = [
+//            "currency": PaymentsData.amount.currencyCode,
+//            "value": PaymentsData.amount.value
+//        ]
+
         try container.encode(data.paymentMethod.encodable, forKey: .details)
-        try container.encode(data.storePaymentMethod, forKey: .storePaymentMethod)
+//        try container.encode(data.storePaymentMethod, forKey: .storePaymentMethod)
         try container.encode("iOS", forKey: .channel)
-        try container.encode(amount, forKey: .amount)
+        try container.encode(PaymentsData.amount.value, forKey: .amount)
         try container.encode(PaymentsData.reference, forKey: .reference)
-        try container.encode(PaymentsData.countryCode, forKey: .countryCode)
+//        try container.encode(PaymentsData.countryCode, forKey: .countryCode)
         try container.encode(PaymentsData.returnUrl, forKey: .returnUrl)
-        try container.encode(PaymentsData.shopperReference, forKey: .shopperReference)
-        try container.encode(PaymentsData.shopperEmail, forKey: .shopperEmail)
-        try container.encode(PaymentsData.shopperLocale, forKey: .shopperLocale)
-        try container.encode(PaymentsData.additionalData, forKey: .additionalData)
+//        try container.encode(PaymentsData.shopperReference, forKey: .shopperReference)
+//        try container.encode(PaymentsData.shopperEmail, forKey: .shopperEmail)
+//        try container.encode(PaymentsData.shopperLocale, forKey: .shopperLocale)
+//        try container.encode(PaymentsData.merchantAccount, forKey: .merchantAccount)
+//        try container.encode(PaymentsData.additionalData, forKey: .additionalData)
+        try container.encode(PaymentsData.regionId, forKey: .regionId)
     }
     
     private enum CodingKeys: String, CodingKey {
-        case details = "paymentMethod"
-        case storePaymentMethod
+        case details = "payment_method"
+//        case storePaymentMethod
         case amount
         case reference
         case channel
-        case countryCode
-        case returnUrl
-        case shopperReference
-        case shopperEmail
-        case shopperLocale
-        case additionalData
-        case merchantAccount
+//        case countryCode
+        case returnUrl = "return_url"
+//        case shopperReference
+//        case shopperEmail
+//        case shopperLocale
+//        case additionalData
+//        case merchantAccount
+        case regionId = "region_id"
     }
     
 }
@@ -83,7 +87,9 @@ internal struct PaymentsResponse: Response {
     internal let type:String?
     internal let errorMessage:String?
     internal var error_code:String?
+    internal var spinError:String?
     internal var validationError : ValidationError?
+    internal let spinCardData : [Any]?
 
     internal struct ValidationError : Error {
         let type : String?
@@ -102,12 +108,14 @@ internal struct PaymentsResponse: Response {
         self.action = try container.decodeIfPresent(Action.self, forKey: .action)
         self.pspReference = try container.decodeIfPresent(String.self,forKey: .pspReference)
         self.additionalData = try container.decodeIfPresent([String: Any].self,forKey: .additionalData)
+        self.spinCardData = try container.decodeIfPresent([Any].self, forKey: .payments)
         self.merchantReference = try container.decodeIfPresent(String.self, forKey: .merchantReference)
         self.refusalReasonCode = try container.decodeIfPresent(String.self, forKey: .refusalReasonCode)
         self.refusalReason = try container.decodeIfPresent(String.self, forKey: .refusalReason)
         self.type = try container.decodeIfPresent(String.self, forKey: .type)
         self.errorCode = try container.decodeIfPresent(String.self, forKey: .errorCode)
         self.errorMessage = try container.decodeIfPresent(String.self, forKey: .errorMessage)
+        self.spinError =  try container.decodeIfPresent(String.self, forKey: .error)
         self.error_code = self.decode_error_code(self.refusalReasonCode)
         if(self.type != nil){
             self.validationError = ValidationError(type:self.type,errorCode:self.errorCode,errorMessage:self.errorMessage)
@@ -168,6 +176,8 @@ internal struct PaymentsResponse: Response {
         case type
         case errorMessage
         case errorCode
+        case error
+        case payments
     }
     
 }

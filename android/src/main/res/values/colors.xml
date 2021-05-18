@@ -10,4 +10,6 @@
 <resources>
     <color name="overlay">#55000000</color>
     <color name="indicator_color">#1F000000</color>
+    <color name="spin_orange">#FFFF5436</color>
+    <color name="spin_orange_accent">#FFE03F23</color>
 </resources>

@@ -69,6 +69,7 @@ import com.rnlib.adyen.ui.LoadingDialogFragment
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
+import org.json.JSONArray
 
 class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : ReactContextBaseJavaModule(reactContext),ActivityEventListener {
 
@@ -177,9 +178,8 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
         paymentData = ReactNativeUtils.convertMapToJson(paymentDetails)
         val compData = ReactNativeUtils.convertMapToJson(componentData)
         val additionalData: MutableMap<String, String> = linkedMapOf()
-        val paymentMethodReq : PaymentMethodsRequest = PaymentMethodsRequest(paymentData.getString("merchantAccount"),
-            paymentData.getString("shopperReference"),additionalData,ArrayList<String>(),getAmt(paymentData.getJSONObject("amount")),
-                 ArrayList<String>(),paymentData.getString("countryCode"),paymentData.getString("shopperLocale"),"Android")
+        val amount = getAmt(paymentData.getJSONObject("amount"))
+        val paymentMethodReq : PaymentMethodsRequest = PaymentMethodsRequest(amount.value)
 
         val paymentMethods : Call<ResponseBody> = ApiService.checkoutApi(configData.base_url).paymentMethods(configData.app_url_headers,paymentMethodReq)
         setLoading(true)
@@ -260,8 +260,9 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
             }
         }
         //adyenConfigurationBuilder.setEnvironment(Environment.TEST)
-        val localeArr = paymentData.getString("shopperLocale").split("_")
-        val shopperLocale = Locale(localeArr[0],localeArr[1])
+        val countryCode = paymentData.getString("countryCode")
+        val language = Locale.getDefault().getDisplayLanguage()
+        val shopperLocale = Locale(language,countryCode)
         //val shoppersLocale = Locale(paymentData.getString("shopperLocale").toLowerCase().split("_")[0])
         adyenConfigurationBuilder.setShopperLocale(shopperLocale)
         try {
@@ -365,7 +366,7 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
         val context = getReactApplicationContext()
         val cardComponent : JSONObject = componentData.getJSONObject(PaymentMethodTypes.SCHEME)
         val cardConfiguration = CardConfiguration.Builder(context, cardComponent.getString("card_public_key"))
-                            .setShopperReference(paymentData.getString("shopperReference"))
+                            .setShowStorePaymentField(cardComponent.getBoolean("shouldShowSCAToggle"))
                             .build()
         val configBuilder : AdyenComponentConfiguration.Builder = createConfigurationBuilder(context)
         configBuilder.addCardConfiguration(cardConfiguration)
@@ -375,7 +376,7 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
     @Suppress("UNUSED_PARAMETER")
     private fun showGooglePayComponent(componentData : JSONObject){
         val context = getReactApplicationContext()
-        val googlePayConfigBuilder = GooglePayConfiguration.Builder(context,paymentData.getString("merchantAccount"))
+        val googlePayConfigBuilder = GooglePayConfiguration.Builder(context,"SpinAccount095ECOM")
         when (configData.environment) {
             "test" -> {googlePayConfigBuilder.setGooglePayEnvironment(WalletConstants.ENVIRONMENT_TEST)}
             "live" -> {googlePayConfigBuilder.setGooglePayEnvironment(WalletConstants.ENVIRONMENT_PRODUCTION)}
@@ -523,7 +524,7 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
             val response : JSONObject = JSONObject(intent.getStringExtra(AdyenComponent.RESULT_KEY))
             sendResponse(response)
         }else if(intent?.hasExtra(AdyenComponent.RESULT_CANCEL_KEY) == true){
-            sendFailure("ERROR_CANCELLED","Transaction Cancelled")
+//            sendFailure("ERROR_CANCELLED","Transaction Cancelled")
         }
     }
 
@@ -540,10 +541,12 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
             if(rsCode == "Authorised" || rsCode == "Received" || rsCode == "Pending"){
                 val message : JSONObject = JSONObject()
                 val addt_data_obj : JSONObject = if(detailsResponse.has("additionalData"))  detailsResponse.getJSONObject("additionalData") else JSONObject()
+                val creditCards : JSONArray? = if(detailsResponse.has("payments"))  detailsResponse.getJSONArray("payments") else null
                 message.put("resultCode", detailsResponse.getString("resultCode"))
                 message.put("merchantReference", detailsResponse.getString("merchantReference"))
                 message.put("pspReference", detailsResponse.getString("pspReference"))
                 message.put("additionalData", addt_data_obj)
+                if(creditCards != null)  message.put("creditCards", creditCards)
 
                 sendSuccess(message)
             }else if(rsCode == "Refused" || rsCode == "Error"){
@@ -587,7 +590,7 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
                 }
                 sendFailure(err_code,detailsResponse.getString("refusalReason"))
             }else if(rsCode == "Cancelled"){
-                sendFailure("ERROR_CANCELLED","Transaction Cancelled")
+//                sendFailure("ERROR_CANCELLED","Transaction Cancelled")
             }else{
                 sendFailure("ERROR_UNKNOWN","Unknown Error")
             }
@@ -604,7 +607,7 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
     private fun parseActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         Log.d(TAG, "parseActivityResult")
         if (requestCode == DropIn.DROP_IN_REQUEST_CODE && resultCode == Activity.RESULT_CANCELED && data != null) {
-            sendFailure("ERROR_CANCELLED","Transaction Cancelled")
+//            sendFailure("ERROR_CANCELLED","Transaction Cancelled")
             Log.d(TAG, "DropIn CANCELED")
         }
     }

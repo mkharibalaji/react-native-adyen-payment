@@ -75,15 +75,19 @@ class AdyenComponentService : ComponentService() {
         
         val configData : AppServiceConfigData = AdyenPaymentModule.getAppServiceConfigData();
         val paymentRequest : JSONObject = AdyenPaymentModule.getPaymentData();
-        paymentRequest.putOpt("paymentMethod", paymentComponentData.getJSONObject("paymentMethod"))
-        paymentRequest.put("storePaymentMethod", paymentComponentData.getBoolean("storePaymentMethod"))
-        paymentRequest.put("returnUrl", RedirectComponent.getReturnUrl(applicationContext))
-        paymentRequest.put("channel", "Android")
-
+        val amount = paymentRequest.getJSONObject("amount")
+        paymentRequest.putOpt("payment_method", paymentComponentData.getJSONObject("paymentMethod"))
+        paymentRequest.put("region_id", paymentRequest.getInt("regionId"))
+        paymentRequest.put("return_url", RedirectComponent.getReturnUrl(applicationContext))
+        paymentRequest.put("amount", amount.getInt("value"))
         Log.i(TAG, "paymentComponentData - ${JsonUtils.indent(paymentComponentData)}")
 
         val requestBody = paymentRequest.toString().toRequestBody(CONTENT_TYPE)
-        val call = ApiService.checkoutApi(configData.base_url).payments(configData.app_url_headers,requestBody)
+        var call = ApiService.checkoutApi(configData.base_url).addCards(configData.app_url_headers,requestBody)
+        when (paymentRequest.getString("reference")) {
+            "api/v1/adyen/trip_payments" -> call = ApiService.checkoutApi(configData.base_url).tripPayments(configData.app_url_headers,requestBody)
+            "api/v1/adyen/user_credit_payments" -> call = ApiService.checkoutApi(configData.base_url).userCredit(configData.app_url_headers,requestBody)
+        }
         return handleResponse(call)
     }
 
