@@ -1,5 +1,6 @@
 package com.rnlib.adyen.ui.component
 
+import android.graphics.Color
 import android.os.Bundle
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import android.view.LayoutInflater
@@ -64,6 +65,9 @@ class GenericComponentDialogFragment : BaseComponentDialogFragment() {
             payButton.isEnabled = paymentComponentState != null && paymentComponentState.isValid()
         } else {
             startPayment()
+        }
+        if(payButton.isEnabled) {
+            payButton.setBackgroundColor(Color.parseColor("#1A73E8"))
         }
     }
 
