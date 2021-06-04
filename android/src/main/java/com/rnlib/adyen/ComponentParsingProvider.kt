@@ -24,9 +24,9 @@ import com.adyen.checkout.base.util.PaymentMethodTypes
 import com.adyen.checkout.bcmc.BcmcComponent
 import com.adyen.checkout.bcmc.BcmcConfiguration
 import com.adyen.checkout.bcmc.BcmcView
-import com.adyen.checkout.card.CardComponent
 import com.adyen.checkout.card.CardConfiguration
-import com.adyen.checkout.card.CardView
+import com.adyen.checkout.card.SpinCardView
+import com.adyen.checkout.card.CardComponent
 import com.adyen.checkout.core.exception.CheckoutException
 import com.adyen.checkout.core.log.LogUtil
 import com.adyen.checkout.core.log.Logger
@@ -263,7 +263,7 @@ internal fun getViewFor(
         PaymentMethodTypes.DOTPAY -> DotpayRecyclerView(context)
         PaymentMethodTypes.OPEN_BANKING -> OpenBankingRecyclerView(context)
         PaymentMethodTypes.ENTERCASH -> EntercashRecyclerView(context)
-        PaymentMethodTypes.SCHEME -> CardView(context)
+        PaymentMethodTypes.SCHEME -> SpinCardView(context)
         PaymentMethodTypes.SEPA -> SepaView(context)
         PaymentMethodTypes.BCMC -> BcmcView(context)
         PaymentMethodTypes.AFTER_PAY -> AfterPayView(context)

@@ -17,7 +17,6 @@ import android.widget.Toast
 import android.text.TextUtils
 import com.adyen.checkout.base.ActionComponentData
 import com.adyen.checkout.base.ComponentError
-import com.adyen.checkout.base.PaymentComponentState
 import com.adyen.checkout.base.model.PaymentMethodsApiResponse
 import com.adyen.checkout.base.model.paymentmethods.PaymentMethod
 import com.adyen.checkout.base.model.payments.request.PaymentComponentData
@@ -37,7 +36,6 @@ import com.rnlib.adyen.R
 import com.rnlib.adyen.service.CallResult
 import com.rnlib.adyen.service.ComponentService
 import com.rnlib.adyen.ui.base.DropInBottomSheetDialogFragment
-import com.rnlib.adyen.ui.component.CardComponentDialogFragment
 import com.rnlib.adyen.ui.component.GenericComponentDialogFragment
 import com.rnlib.adyen.ui.paymentmethods.PaymentMethodListDialogFragment
 
@@ -46,6 +44,7 @@ import com.adyen.checkout.googlepay.GooglePayComponentState
 import com.adyen.checkout.googlepay.GooglePayConfiguration
 import com.adyen.checkout.redirect.RedirectUtil
 import com.adyen.checkout.wechatpay.WeChatPayUtils
+import com.rnlib.adyen.ui.component.CardComponentDialogFragment
 import org.json.JSONObject
 import java.util.Locale
 
@@ -180,7 +179,7 @@ class AdyenComponentActivity : AppCompatActivity(), DropInBottomSheetDialogFragm
                     this.showComponentDialog(paymentMethod, true)
                 }
             }
-            PaymentMethodTypes.GOOGLE_PAY -> {
+                PaymentMethodTypes.GOOGLE_PAY -> {
                 var googlepayConfiguration = adyenComponentConfiguration.getConfigurationFor<GooglePayConfiguration>(PaymentMethodTypes.GOOGLE_PAY, this)
                 this.startGooglePay(paymentMethod, googlepayConfiguration)
             }
