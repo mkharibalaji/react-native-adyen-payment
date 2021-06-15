@@ -376,7 +376,9 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
     @Suppress("UNUSED_PARAMETER")
     private fun showGooglePayComponent(componentData : JSONObject){
         val context = getReactApplicationContext()
-        val googlePayConfigBuilder = GooglePayConfiguration.Builder(context,"SpinAccount095ECOM")
+        val gpayComponent : JSONObject = componentData.getJSONObject(PaymentMethodTypes.GOOGLE_PAY)
+        val merchantAccount =  gpayComponent.getString("merchantAccount")
+        val googlePayConfigBuilder = GooglePayConfiguration.Builder(context, merchantAccount)
         when (configData.environment) {
             "test" -> {googlePayConfigBuilder.setGooglePayEnvironment(WalletConstants.ENVIRONMENT_TEST)}
             "live" -> {googlePayConfigBuilder.setGooglePayEnvironment(WalletConstants.ENVIRONMENT_PRODUCTION)}
@@ -387,6 +389,8 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
                 googlePayConfigBuilder.setGooglePayEnvironment(WalletConstants.ENVIRONMENT_PRODUCTION)
             }
         }
+        val amount = getAmt(paymentData.getJSONObject("amount"))
+        googlePayConfigBuilder.setAmount(amount)
         googlePayConfigBuilder.setCountryCode(paymentData.getString("countryCode"))
         val googlePayConfig = googlePayConfigBuilder.build()
         val configBuilder : AdyenComponentConfiguration.Builder = createConfigurationBuilder(context)
