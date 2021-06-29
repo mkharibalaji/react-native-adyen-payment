@@ -1,0 +1,27 @@
+<!--
+  ~ Copyright (c) 2019 Adyen N.V.
+  ~
+  ~ This file is open source and available under the MIT license. See the LICENSE file for more info.
+  ~
+  ~ Created by caiof on 21/3/2019.
+  -->
+
+<resources>
+    <string name="pay_button">Zahlen</string>
+    <string name="pay_button_with_value">%s zahlen</string>
+    <string name="payment_methods_header">Zahlungsmethoden</string>
+    <string name="error_dialog_title">Fehler</string>
+    <string name="error_dialog_button">OK</string>
+    <string name="payment_failed">Error sending payment. Please try again.</string>
+    <string name="action_failed">Bei der Verarbeitung Ihrer Zahlung ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.</string>
+    <string name="component_error">Es ist etwas schief gegangen.</string>
+    <string name="time_out_error">Request timed out. Please try again.</string>
+    <string name="store_payment_methods_header">Ihre Zahlungsmethoden</string>
+    <string name="other_payment_methods">Andere Zahlungsmethoden</string>
+    <string name="continue_button">Weiter</string>
+    <string name="change_payment_method">Zahlungsmethode wechseln</string>
+    <string name="credit_card">Credit Card</string>
+    <string name="add_card">Karte hinzufügen</string>
+    <string name="spin_auth_terms">Ich gestatte Spin, Zahlungen von dem Kreditinstitut entgegenzunehmen, das meine Karte ausgestellt hat – gemäß den Bedingungen meiner Zustimmung zu den Geschäftsbedingungen von Spin.</string>
+    <string name="spin_terms">Geschäftsbedingungen von Spin</string>
+</resources>
