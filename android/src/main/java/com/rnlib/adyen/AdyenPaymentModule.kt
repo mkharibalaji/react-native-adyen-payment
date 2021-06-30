@@ -237,7 +237,9 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
                 // something went completely south (like no internet connection)
                 setLoading(false)
                 sendFailure("ERROR_GENERAL",t!!.message.toString())
-                Log.d("Error", t.message)
+
+                // TODO: Define what to do if [t.message] is null
+                Log.d("Error", t.message!!)
             }
         })
     }
@@ -523,7 +525,8 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
     override fun onNewIntent(intent: Intent?) {
         Log.d(TAG, "onNewIntent")
         if (intent?.hasExtra(AdyenComponent.RESULT_KEY) == true) {
-            Log.d(TAG,intent.getStringExtra(AdyenComponent.RESULT_KEY))
+            // TODO: Define what to do if [intent.getStringExtra(AdyenComponent.RESULT_KEY)] is null
+            Log.d(TAG,intent.getStringExtra(AdyenComponent.RESULT_KEY)!!)
             //Toast.makeText(getReactApplicationContext(), intent.getStringExtra(DropIn.RESULT_KEY), Toast.LENGTH_SHORT).show()
             val response : JSONObject = JSONObject(intent.getStringExtra(AdyenComponent.RESULT_KEY))
             sendResponse(response)

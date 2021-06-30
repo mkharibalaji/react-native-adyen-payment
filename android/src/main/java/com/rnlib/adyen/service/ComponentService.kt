@@ -90,8 +90,9 @@ abstract class ComponentService : JobIntentService() {
 
         when (intent.getStringExtra(REQUEST_TYPE_KEY)) {
             PAYMENTS_REQUEST -> {
+                // TODO: Define what to do if [paymentComponentDataForRequest] is null
                 val paymentComponentDataForRequest =
-                    intent.getParcelableExtra<PaymentComponentData<in PaymentMethodDetails>>(PAYMENT_COMPONENT_DATA_EXTRA_KEY)
+                    intent.getParcelableExtra<PaymentComponentData<in PaymentMethodDetails>>(PAYMENT_COMPONENT_DATA_EXTRA_KEY)!!
                 askPaymentsCall(paymentComponentDataForRequest)
             }
             DETAILS_REQUEST -> {
