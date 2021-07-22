@@ -415,25 +415,26 @@ class AdyenPayment: RCTEventEmitter {
     }
     
     func finish(with response: PaymentsResponse) {
-        let resultCode : PaymentsResponse.ResultCode = response.resultCode!
-        if(resultCode == .authorised || resultCode == .received || resultCode == .pending){
-            let additionalData : NSDictionary = (response.additionalData != nil) ? NSMutableDictionary(dictionary:response.additionalData!) : NSDictionary()
-            print(response)
-            let msg:Dictionary? = ["resultCode" : resultCode.rawValue,"merchantReference":response.merchantReference!,"pspReference" : response.pspReference!,"additionalData" : additionalData]
-            self.sendSuccess(message:msg)
-        }else if(resultCode == .refused || resultCode == .error){
-            self.sendFailure(code : response.error_code ?? "",message: response.refusalReason ?? "")
-        }else if (resultCode == .cancelled){
-            self.sendFailure(code : "ERROR_CANCELLED",message: "Transaction Cancelled")
-        }else{
-            self.sendFailure(code : "ERROR_UNKNOWN",message: "Unknown Error")
-        }
         currentComponent?.stopLoading(withSuccess: true) { [] in
-            (UIApplication.shared.delegate?.window??.rootViewController)!.dismiss(animated: true) {}
-        }
-        redirectComponent = nil
-        threeDS2Component = nil
+            let resultCode : PaymentsResponse.ResultCode = response.resultCode!
+            if(resultCode == .authorised || resultCode == .received || resultCode == .pending){
+                let additionalData : NSDictionary = (response.additionalData != nil) ? NSMutableDictionary(dictionary:response.additionalData!) : NSDictionary()
+                print(response)
+                let msg:Dictionary? = ["resultCode" : resultCode.rawValue,"merchantReference":response.merchantReference!,"pspReference" : response.pspReference!,"additionalData" : additionalData]
+                self.sendSuccess(message:msg)
+            }else if(resultCode == .refused || resultCode == .error){
+                self.sendFailure(code : response.error_code ?? "",message: response.refusalReason ?? "")
+            }else if (resultCode == .cancelled){
+                self.sendFailure(code : "ERROR_CANCELLED",message: "Transaction Cancelled")
+            }else{
+                self.sendFailure(code : "ERROR_UNKNOWN",message: "Unknown Error")
+            }
         
+            (UIApplication.shared.delegate?.window??.rootViewController)!.dismiss(animated: true) {}
+            
+            self.redirectComponent = nil
+            self.threeDS2Component = nil
+        }
     }
     
     func finish(with error: Error) {
