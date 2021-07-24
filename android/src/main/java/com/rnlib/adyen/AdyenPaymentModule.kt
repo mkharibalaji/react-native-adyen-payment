@@ -546,9 +546,7 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
                 message.put("additionalData", addt_data_obj)
 
                 sendSuccess(message)
-            }else if(rsCode == "Refused" && detailsResponse.isNull("refusalReasonCode")){
-                sendFailure("ERROR_UNKNOWN", "Unknown Error")
-            }else if(rsCode == "Refused" || rsCode == "Error"){
+            }else if((rsCode == "Refused" || rsCode == "Error") && detailsResponse.has("refusalReasonCode")){
                 val err_refusal_code = detailsResponse.getString("refusalReasonCode")
                 val err_code = when(err_refusal_code) {
                     "0" -> "ERROR_GENERAL"

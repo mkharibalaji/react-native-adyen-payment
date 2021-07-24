@@ -148,7 +148,7 @@ class AdyenPayment: RCTEventEmitter {
             guard appleComponent["apple_pay_merchant_id"] != nil else {return}
             do{
                 let amt = NSDecimalNumber(string: String(format: "%.2f", Float(PaymentsData.amount.value) / 100))
-                let applePaySummaryItems = [PKPaymentSummaryItem(label: "Total", amount: amt, type: .final)]
+                let applePaySummaryItems = [PKPaymentSummaryItem(label: (appleComponent["apple_pay_label"] as? String) ?? "Total", amount: amt, type: .final)]
                 let component = try ApplePayComponent(paymentMethod: paymentMethod,payment:Payment(amount: PaymentsData.amount, countryCode: PaymentsData.countryCode),merchantIdentifier: appleComponent["apple_pay_merchant_id"] as! String,summaryItems: applePaySummaryItems)
                 component.delegate = self
                 self.present(component)
@@ -279,7 +279,7 @@ class AdyenPayment: RCTEventEmitter {
             configuration.applePay.merchantIdentifier = appleComponent["apple_pay_merchant_id"] as? String
             // let amt = NSDecimalNumber(string: String(format: "%.2f", Float((PaymentsData.amount.value) / 100)))
             let amt = NSDecimalNumber(string: String(format: "%.2f", Float(PaymentsData.amount.value) / 100))
-            let applePaySummaryItems = [PKPaymentSummaryItem(label: "Total", amount: amt, type: .final)]
+            let applePaySummaryItems = [PKPaymentSummaryItem(label: (appleComponent["apple_pay_label"] as? String) ?? "Total", amount: amt, type: .final)]
             configuration.applePay.summaryItems = applePaySummaryItems
         }
         DispatchQueue.main.async {

@@ -83,7 +83,8 @@ class App extends Component<Props> {
             "card_public_key" : CARD_PUBLIC_KEY
           },
           "applepay" : {
-            "apple_pay_merchant_id" : "Your Apple Merchant ID"
+            "apple_pay_merchant_id" : "Your Apple Merchant ID",
+            "apple_pay_label": "Your company name"
           },
           "bcmc":{
             "card_public_key" : CARD_PUBLIC_KEY
@@ -174,7 +175,8 @@ class App extends Component<Props> {
             "card_public_key" : CARD_PUBLIC_KEY
           },
           "applepay" : {
-            "apple_pay_merchant_id" : "Your Apple Merchant ID"
+            "apple_pay_merchant_id" : "Your Apple Merchant ID",
+            "apple_pay_label": "Your company name"
           },
           "bcmc":{
             "card_public_key" : CARD_PUBLIC_KEY
