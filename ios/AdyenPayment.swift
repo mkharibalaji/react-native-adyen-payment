@@ -174,7 +174,6 @@ class AdyenPayment: RCTEventEmitter {
                 print(stored_py_mthd.type)
                 if(stored_py_mthd.type == "scheme"){
                     storedPaymentMethods.append(stored_py_mthd)
-                    break
                 }
             }
             let dropInComponent = DropInComponent(paymentMethods: PaymentMethods(regular:regularPaymentMethods, stored:storedPaymentMethods),paymentMethodsConfiguration: configuration)
