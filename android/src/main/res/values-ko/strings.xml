@@ -22,6 +22,4 @@
     <string name="change_payment_method">결제 수단 변경</string>
     <string name="credit_card">Credit Card</string>
     <string name="add_card">카드 추가</string>
-    <string name="spin_auth_terms">Spin 약관에 대한 계약 조건에 따라 Spin이 본 계약의 조항에 의거해 카드를 발급한 금융 기관에서 지불하는 것을 승인합니다.</string>
-    <string name="spin_terms">Spin 약관</string>
 </resources>

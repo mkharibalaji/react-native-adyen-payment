@@ -22,6 +22,4 @@
     <string name="change_payment_method">變更付款方式</string>
     <string name="credit_card">Credit Card</string>
     <string name="add_card">新增卡片</string>
-    <string name="spin_auth_terms">我授權 Spin 依照 Spin 條款，向我的發卡金融機構收取款項。</string>
-    <string name="spin_terms">Spin 條款</string>
 </resources>

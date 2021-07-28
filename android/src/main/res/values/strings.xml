@@ -20,6 +20,4 @@
     <string name="change_payment_method">Change payment method</string>
     <string name="credit_card">Credit Card</string>
     <string name="add_card">Add Card</string>
-    <string name="spin_auth_terms">I authorize Spin to take payments from the financial institution that issued my card in accordance with the terms of my agreement with Spin Terms.</string>
-    <string name="spin_terms">Spin Terms</string>
 </resources>
