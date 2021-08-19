@@ -164,3 +164,8 @@ The AdyenPayment system internally calls your API base URL with the following PO
           }
 
 :warning: When implementing the `/payments` endpoint, make sure to validate the `amount` server-side. A malicious end user could spoof requests and change the amount being send from the client. :warning:
+
+	
+### Apple Pay
+	
+To use Apple pay, follow the [adyen documentation](https://docs.adyen.com/payment-methods/apple-pay/enable-apple-pay#create-merchant-identifier)
