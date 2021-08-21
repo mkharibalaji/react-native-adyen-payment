@@ -1,7 +1,7 @@
 {
   "name": "react-native-adyen-payment",
   "title": "React Native Adyen Payment",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "description": "React Native Adyen Payment Native Module",
   "main": "index.js",
   "scripts": {
