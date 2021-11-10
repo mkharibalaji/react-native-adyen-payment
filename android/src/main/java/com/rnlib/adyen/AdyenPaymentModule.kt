@@ -387,6 +387,18 @@ class AdyenPaymentModule(private var reactContext : ReactApplicationContext) : R
             }
         }
         googlePayConfigBuilder.setCountryCode(paymentData.getString("countryCode"))
+                
+        val amount = Amount()
+        val amtJson : JSONObject  = paymentData.getJSONObject("amount")
+        amount.currency = amtJson.getString("currency")
+        amount.value = amtJson.getInt("value")
+
+        try {
+            googlePayConfigBuilder.setAmount(amount)
+        } catch (e: CheckoutException) {
+            Log.e(TAG, "Amount $amount not valid", e)
+        }
+        
         val googlePayConfig = googlePayConfigBuilder.build()
         val configBuilder : AdyenComponentConfiguration.Builder = createConfigurationBuilder(context)
         configBuilder.addGooglePayConfiguration(googlePayConfig)
