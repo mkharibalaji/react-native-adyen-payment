@@ -92,7 +92,7 @@ abstract class ComponentService : JobIntentService() {
             PAYMENTS_REQUEST -> {
                 val paymentComponentDataForRequest =
                     intent.getParcelableExtra<PaymentComponentData<in PaymentMethodDetails>>(PAYMENT_COMPONENT_DATA_EXTRA_KEY)
-                askPaymentsCall(paymentComponentDataForRequest)
+                if (paymentComponentDataForRequest != null) askPaymentsCall(paymentComponentDataForRequest)
             }
             DETAILS_REQUEST -> {
                 val detailsString = intent.getStringExtra(DETAILS_EXTRA_KEY)
