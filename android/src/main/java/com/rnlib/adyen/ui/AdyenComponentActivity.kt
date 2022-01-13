@@ -104,7 +104,7 @@ class AdyenComponentActivity : AppCompatActivity(), DropInBottomSheetDialogFragm
                 isWaitingResult = false
                 if (intent.hasExtra(ComponentService.API_CALL_RESULT_KEY)) {
                     val callResult = intent.getParcelableExtra<CallResult>(ComponentService.API_CALL_RESULT_KEY)
-                    handleCallResult(callResult)
+                    if (callResult != null) handleCallResult(callResult)
                 } else {
                     throw CheckoutException("No extra on callResultReceiver")
                 }
@@ -166,11 +166,11 @@ class AdyenComponentActivity : AppCompatActivity(), DropInBottomSheetDialogFragm
 
         adyenComponentViewModel = ViewModelProviders.of(this).get(AdyenComponentViewModel::class.java)
 
-        adyenComponentConfiguration = intent.getParcelableExtra(ADYEN_COMPONENT_CONFIGURATION_KEY)
+        adyenComponentConfiguration = intent.getParcelableExtra(ADYEN_COMPONENT_CONFIGURATION_KEY)!!
 
         adyenComponentViewModel.adyenComponentConfiguration = adyenComponentConfiguration
 
-        adyenComponentViewModel.paymentMethodsApiResponse = intent.getParcelableExtra(PAYMENT_METHODS_RESPONSE_KEY)
+        adyenComponentViewModel.paymentMethodsApiResponse = intent.getParcelableExtra(PAYMENT_METHODS_RESPONSE_KEY)!!
         val paymentMethod : PaymentMethod = adyenComponentViewModel.paymentMethodsApiResponse.paymentMethods!![0]
         when (paymentMethod.type) {
             PaymentMethodTypes.SCHEME -> {
@@ -195,7 +195,7 @@ class AdyenComponentActivity : AppCompatActivity(), DropInBottomSheetDialogFragm
         resultIntent = if (savedInstanceState != null && savedInstanceState.containsKey(ADYEN_COMPONENT_INTENT)) {
             savedInstanceState.getParcelable(ADYEN_COMPONENT_INTENT)!!
         } else {
-            intent.getParcelableExtra(ADYEN_COMPONENT_INTENT)
+            intent.getParcelableExtra(ADYEN_COMPONENT_INTENT)!!
         }
 
         callResultIntentFilter = IntentFilter(ComponentService.getCallResultAction(this))
