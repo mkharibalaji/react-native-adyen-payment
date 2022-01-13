@@ -1,7 +1,7 @@
 {
   "name": "react-native-adyen-payment",
   "title": "React Native Adyen Payment",
-  "version": "1.9.1",
+  "version": "1.9.2",
   "description": "React Native Adyen Payment Native Module",
   "main": "index.js",
   "scripts": {
@@ -33,7 +33,8 @@
       "changelog": "npx auto-changelog --stdout --issue-url --commit-limit false -u --template https://raw.githubusercontent.com/release-it/release-it/master/conf/changelog-compact.hbs"
     },
     "github": {
-      "release": true
+      "release": true,
+      "tokenRef": "GITHUB_TOKEN"
     }
   },
   "peerDependencies": {
