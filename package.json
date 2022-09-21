@@ -38,12 +38,10 @@
     }
   },
   "peerDependencies": {
-    "react": "^16.8.3",
     "react-native": ">=0.60.0 <1.0.x"
   },
   "devDependencies": {
     "auto-changelog": "^1.16.2",
-    "react": "^16.8.3",
     "react-native": "^0.60.0",
     "release-it": "^12.4.3"
   }
